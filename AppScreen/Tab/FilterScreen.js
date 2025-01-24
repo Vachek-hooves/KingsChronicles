@@ -6,6 +6,7 @@ import {
   ScrollView,
   Image,
   Modal,
+  Dimensions,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import MainLayout from '../../components/Layout/MainLayout';
@@ -19,6 +20,8 @@ const FilterScreen = () => {
     region: null,
     era: null,
   });
+  const [filteredRulers, setFilteredRulers] = useState([]);
+  const [currentRulerIndex, setCurrentRulerIndex] = useState(0);
 
   // Create filters object from RoyalData
   const filters = {
@@ -53,7 +56,23 @@ const FilterScreen = () => {
     }));
   };
 
-  const handleStepIntoHistory = () => {
+//   useEffect(() => {
+//     // Update filtered rulers whenever filters change
+//     const newFilteredRulers = RoyalData.filter(ruler => {
+//       const dynastyMatch =
+//         !selectedFilters.dynasty || ruler.dynasty === selectedFilters.dynasty;
+//       const regionMatch =
+//         !selectedFilters.region || ruler.region === selectedFilters.region;
+//       const eraMatch = !selectedFilters.era || ruler.era === selectedFilters.era;
+
+//       return dynastyMatch && regionMatch && eraMatch;
+//     });
+//     setFilteredRulers(newFilteredRulers);
+//     setCurrentRulerIndex(0); // Reset to first ruler when filters change
+   
+//   }, [selectedFilters]);
+
+const handleStepIntoHistory = () => {
     // Filter RoyalData based on selected filters
     const filteredRulers = RoyalData.filter(ruler => {
       const dynastyMatch =
@@ -71,15 +90,32 @@ const FilterScreen = () => {
     // navigation.navigate('HistoryScreen', { filteredRulers });
   };
 
+  const handleNext = () => {
+    setCurrentRulerIndex(prev =>
+      prev < filteredRulers.length - 1 ? prev + 1 : prev,
+    );
+  };
+
+  const handlePrevious = () => {
+    setCurrentRulerIndex(prev => (prev > 0 ? prev - 1 : prev));
+  };
+
+  const currentRuler = filteredRulers[currentRulerIndex];
+
   return (
     <MainLayout>
       <View style={styles.container}>
         {/* Timeline Design */}
         <View style={styles.timelineContainer}>
-          <Image
-            source={require('../../assets/image/ui/hourglass.png')}
-            style={styles.hourglassIcon}
-          />
+          <View style={styles.timeline}>
+            <View style={styles.timelineLine} />
+            <View style={[styles.timelineDot, {left: '25%'}]} />
+            <Image
+              source={require('../../assets/image/ui/hourglass.png')}
+              style={styles.hourglassIcon}
+            />
+            <View style={[styles.timelineDot, {right: '25%'}]} />
+          </View>
         </View>
 
         {/* Filter Icon */}
@@ -91,6 +127,50 @@ const FilterScreen = () => {
             style={styles.filterIcon}
           />
         </TouchableOpacity>
+
+        {/* Ruler Display */}
+        {filteredRulers.length > 0 && (
+          <View style={styles.rulerContainer}>
+            {/* Navigation Icons */}
+            <View style={styles.navigationContainer}>
+              <TouchableOpacity
+                onPress={handlePrevious}
+                style={[
+                  styles.navButton,
+                  currentRulerIndex === 0 && styles.navButtonDisabled,
+                ]}>
+                {/* <Image
+                  source={require('../../assets/image/icons/previous.png')}
+                  style={styles.navIcon}
+                /> */}
+                <Text>Previous</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleNext}
+                style={[
+                  styles.navButton,
+                  currentRulerIndex === filteredRulers.length - 1 &&
+                    styles.navButtonDisabled,
+                ]}>
+                {/* <Image
+                  source={require('../../assets/image/icons/next.png')}
+                  style={styles.navIcon}
+                /> */}
+                <Text>Next</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Ruler Name */}
+            <Text style={styles.rulerName}>{currentRuler.name}</Text>
+
+            {/* Ruler Image */}
+            <Image
+              source={require('../../assets/image/royal/henry.png')} // You'll need to handle dynamic image imports
+              style={styles.rulerImage}
+              resizeMode="contain"
+            />
+          </View>
+        )}
 
         {/* Filter Modal */}
         <Modal
@@ -178,8 +258,13 @@ const FilterScreen = () => {
           )}
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={handleStepIntoHistory}>
-          <Text style={styles.buttonText}>Step into History</Text>
+        <TouchableOpacity
+          style={styles.stepButton}
+          onPress={() => {
+            handleStepIntoHistory();
+            /* Handle navigation to detail screen */
+          }}>
+          <Text style={styles.stepButtonText}>Step into History</Text>
         </TouchableOpacity>
       </View>
     </MainLayout>
@@ -345,5 +430,54 @@ const styles = StyleSheet.create({
     // right: 20,
     // top: 40,
     zIndex: 1,
+  },
+  rulerContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+  navigationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    position: 'absolute',
+    top: 20,
+    paddingHorizontal: 20,
+  },
+  navButton: {
+    padding: 10,
+  },
+  navButtonDisabled: {
+    opacity: 0.5,
+  },
+  navIcon: {
+    width: 24,
+    height: 24,
+    tintColor: '#C5A572',
+  },
+  rulerName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#000',
+  },
+  rulerImage: {
+    width: '100%',
+    height: 400,
+    borderRadius: 20,
+  },
+  stepButton: {
+    backgroundColor: '#C5A572',
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 25,
+    marginBottom: 20,
+    alignSelf: 'center',
+  },
+  stepButtonText: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: '600',
   },
 });
