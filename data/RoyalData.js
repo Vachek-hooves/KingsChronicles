@@ -22,8 +22,8 @@ export const RoyalData = [
       'Henry VIII s daughter by Anne Boleyn, ascended to the throne after years of political turmoil and ruled for 45 years during the Elizabethan Era. Known as the “Virgin Queen” for her decision to remain unmarried, she skillfully navigated the treacherous waters of diplomacy, balancing Protestant and Catholic factions in England. Her reign saw the defeat of the Spanish Armada in 1588, a pivotal moment that established England as a naval power. Under her leadership, England flourished culturally, with luminaries like William Shakespeare and Christopher Marlowe shaping the English Renaissance. Her careful diplomacy and strong leadership ensured a relatively stable and prosperous reign, solidifying her as one of England’s greatest monarchs.',
   },
   {
-    era: 'Renaissance',
     dynasty: 'Bourbons',
+    era: 'Renaissance',
     id: 3,
     region: 'France',
     name: ' Louis XIV',
@@ -33,8 +33,8 @@ export const RoyalData = [
       'the “Sun King,” ruled for an astonishing 72 years, making him one of the longest-reigning monarchs in history. He epitomized absolute monarchy, famously declaring, “L’état, c’est moi” (“I am the state”). Louis transformed France into a dominant European power through his centralized government and lavish spending. The Palace of Versailles, a symbol of his grandeur, became the cultural and political hub of Europe. Despite his success in strengthening France’s influence, his constant wars and extravagant lifestyle drained the country’s finances, sowing seeds of discontent that would contribute to the French Revolution.',
   },
   {
-    era: 'Enlightenment',
     dynasty: 'Romanovs',
+    era: 'Enlightenment',
     id: 4,
     region: 'Russia',
     name: 'Catherine II',
@@ -44,8 +44,8 @@ export const RoyalData = [
       'was a German princess who became one of Russia’s most celebrated rulers after overthrowing her husband, Peter III. Her reign marked a golden age for the Russian Empire, characterized by territorial expansion, cultural development, and modernization. A patron of the arts and Enlightenment thought, she corresponded with leading philosophers like Voltaire and Diderot. Catherine’s reforms aimed to modernize Russia’s government and economy, though her policies often favored the nobility, leaving the peasantry burdened. Her efforts to secularize church lands and promote education left a lasting impact, transforming Russia into a major European power.',
   },
   {
-    era: 'Middle Ages',
     dynasty: 'Carolingian',
+    era: 'Middle Ages',
     id: 5,
     region: 'France',
     name: 'Charlemagne',
@@ -55,8 +55,8 @@ export const RoyalData = [
       'was a medieval king who united much of Western Europe and became the first Holy Roman Emperor in 800. Known as the “Father of Europe,” Charlemagne’s reign marked the Carolingian Renaissance, a revival of art, culture, and education. He established a strong centralized government and standardized laws, helping to lay the foundation for modern European states. A devout Christian, he sought to spread Christianity through conquest, converting conquered peoples across his vast empire. His legacy endures in his contributions to European unity and cultural advancement, as well as in the title of Holy Roman Emperor, which symbolized the connection between church and state for centuries.',
   },
   {
-      era: 'Renaissance',
     dynasty: 'Habsburgs',
+    era: 'Renaissance',
     id: 6,
     region: 'Spain',
     year: '1556-1621',
@@ -169,5 +169,4 @@ export const RoyalData = [
     about:
       'was the 10th and longest-reigning Sultan of the Ottoman Empire. Under his rule, the empire reached its territorial zenith, stretching across three continents. Suleiman was not only a brilliant military commander but also a renowned lawmaker, earning the title “The Lawgiver” in the Islamic world. His reign saw a flourishing of the arts, architecture, and literature, exemplified by the construction of the Suleymaniye Mosque in Istanbul. Suleiman’s leadership strengthened the Ottoman Empire, making it a dominant power in the 16th century and leaving a legacy of cultural and legal advancements.',
   },
-  
 ];
