@@ -7,6 +7,7 @@ import {
   Image,
   Modal,
   Dimensions,
+  SafeAreaView,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import MainLayout from '../../components/Layout/MainLayout';
@@ -41,12 +42,14 @@ const FilterScreen = () => {
         ),
       }),
     ),
-    era: Array.from(new Set(RoyalData.map(ruler => ruler.era))).map(eraName => ({
-      name: eraName,
-      rulers: RoyalData.filter(ruler => ruler.era === eraName).map(
-        ruler => ruler.name,
-      ),
-    })),
+    era: Array.from(new Set(RoyalData.map(ruler => ruler.era))).map(
+      eraName => ({
+        name: eraName,
+        rulers: RoyalData.filter(ruler => ruler.era === eraName).map(
+          ruler => ruler.name,
+        ),
+      }),
+    ),
   };
 
   const handleFilterSelect = filterName => {
@@ -56,39 +59,21 @@ const FilterScreen = () => {
     }));
   };
 
-//   useEffect(() => {
-//     // Update filtered rulers whenever filters change
-//     const newFilteredRulers = RoyalData.filter(ruler => {
-//       const dynastyMatch =
-//         !selectedFilters.dynasty || ruler.dynasty === selectedFilters.dynasty;
-//       const regionMatch =
-//         !selectedFilters.region || ruler.region === selectedFilters.region;
-//       const eraMatch = !selectedFilters.era || ruler.era === selectedFilters.era;
-
-//       return dynastyMatch && regionMatch && eraMatch;
-//     });
-//     setFilteredRulers(newFilteredRulers);
-//     setCurrentRulerIndex(0); // Reset to first ruler when filters change
-   
-//   }, [selectedFilters]);
-
-const handleStepIntoHistory = () => {
-    // Filter RoyalData based on selected filters
-    const filteredRulers = RoyalData.filter(ruler => {
+  useEffect(() => {
+    // Update filtered rulers whenever filters change
+    const newFilteredRulers = RoyalData.filter(ruler => {
       const dynastyMatch =
         !selectedFilters.dynasty || ruler.dynasty === selectedFilters.dynasty;
       const regionMatch =
         !selectedFilters.region || ruler.region === selectedFilters.region;
-      const eraMatch = !selectedFilters.era || ruler.era === selectedFilters.era;
+      const eraMatch =
+        !selectedFilters.era || ruler.era === selectedFilters.era;
 
       return dynastyMatch && regionMatch && eraMatch;
     });
-
-    console.log('Selected filters:', selectedFilters);
-    console.log('Filtered rulers:', filteredRulers);
-    // Later we can navigate with the filtered data:
-    // navigation.navigate('HistoryScreen', { filteredRulers });
-  };
+    setFilteredRulers(newFilteredRulers);
+    setCurrentRulerIndex(0); // Reset to first ruler when filters change
+  }, [selectedFilters]);
 
   const handleNext = () => {
     setCurrentRulerIndex(prev =>
@@ -102,70 +87,103 @@ const handleStepIntoHistory = () => {
 
   const currentRuler = filteredRulers[currentRulerIndex];
 
+  // Image mapping function
+  const getImageSource = imagePath => {
+    const imageName = imagePath.split('/').pop().split('.')[0];
+    switch (imageName) {
+      case 'henry':
+        return require('../../assets/image/royal/henry.png');
+      case 'elizabeth':
+        return require('../../assets/image/royal/elizabeth.png');
+      case 'louis':
+        return require('../../assets/image/royal/louis.png');
+      case 'catherine':
+        return require('../../assets/image/royal/catherine.png');
+      case 'charlemagne':
+        return require('../../assets/image/royal/charlemagne.png');
+      case 'philip':
+        return require('../../assets/image/royal/philip.png');
+      case 'napoleon':
+        return require('../../assets/image/royal/napoleon.png');
+      case 'ivan':
+        return require('../../assets/image/royal/ivan.png');
+      case 'peter':
+        return require('../../assets/image/royal/peter.png');
+      case 'victoria':
+        return require('../../assets/image/royal/victoria.png');
+      case 'clovis':
+        return require('../../assets/image/royal/clovis.png');
+      case 'frederick':
+        return require('../../assets/image/royal/frederick.png');
+      case 'maria':
+        return require('../../assets/image/royal/maria.png');
+      case 'alexander':
+        return require('../../assets/image/royal/alexander.png');
+      case 'alfred':
+        return require('../../assets/image/royal/alfred.png');
+      case 'suleiman':
+        return require('../../assets/image/royal/suleiman.png');
+      default:
+        return require('../../assets/image/royal/default.png'); // Fallback image
+    }
+  };
+
   return (
     <MainLayout>
+      {/* <SafeAreaView style={{flex: 1}}> */}
+        {/* <ScrollView style={{flex: 1}}> */}
       <View style={styles.container}>
         {/* Timeline Design */}
         <View style={styles.timelineContainer}>
-          <View style={styles.timeline}>
-            <View style={styles.timelineLine} />
-            <View style={[styles.timelineDot, {left: '25%'}]} />
-            <Image
-              source={require('../../assets/image/ui/hourglass.png')}
-              style={styles.hourglassIcon}
-            />
-            <View style={[styles.timelineDot, {right: '25%'}]} />
-          </View>
+          {/* <View style={styles.timeline}> */}
+          {/* <View style={styles.timelineLine} /> */}
+          {/* <View style={[styles.timelineDot, {left: '25%'}]} /> */}
+          <Image
+            source={require('../../assets/image/ui/hourglass.png')}
+            style={styles.hourglassIcon}
+          />
+          {/* <View style={[styles.timelineDot, {right: '25%'}]} /> */}
+          {/* </View> */}
         </View>
 
         {/* Filter Icon */}
-        <TouchableOpacity
-          onPress={() => setModalVisible(true)}
-          style={styles.filterIconContainer}>
-          <Image
-            source={require('../../assets/image/icons/filter.png')}
-            style={styles.filterIcon}
-          />
-        </TouchableOpacity>
+        <View style={styles.headerIconContainer}>
+          <TouchableOpacity>
+            <Image
+              source={require('../../assets/image/icons/fullScreen.png')}
+              style={styles.filterIcon}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setModalVisible(true)}
+            style={styles.filterIconContainer}>
+            <Image
+              source={require('../../assets/image/icons/filter.png')}
+              style={styles.filterIcon}
+            />
+          </TouchableOpacity>
+        </View>
+        {/* Selected Filters Display */}
+        <View style={styles.selectedFiltersContainer}>
+          {Object.entries(selectedFilters).map(
+            ([category, value]) =>
+              value && (
+                <View key={category} style={styles.selectedFilterTag}>
+                  <Text style={styles.selectedFilterText}>{value}</Text>
+                </View>
+              ),
+          )}
+        </View>
 
         {/* Ruler Display */}
         {filteredRulers.length > 0 && (
           <View style={styles.rulerContainer}>
-            {/* Navigation Icons */}
-            <View style={styles.navigationContainer}>
-              <TouchableOpacity
-                onPress={handlePrevious}
-                style={[
-                  styles.navButton,
-                  currentRulerIndex === 0 && styles.navButtonDisabled,
-                ]}>
-                {/* <Image
-                  source={require('../../assets/image/icons/previous.png')}
-                  style={styles.navIcon}
-                /> */}
-                <Text>Previous</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleNext}
-                style={[
-                  styles.navButton,
-                  currentRulerIndex === filteredRulers.length - 1 &&
-                    styles.navButtonDisabled,
-                ]}>
-                {/* <Image
-                  source={require('../../assets/image/icons/next.png')}
-                  style={styles.navIcon}
-                /> */}
-                <Text>Next</Text>
-              </TouchableOpacity>
-            </View>
-
             {/* Ruler Name */}
             <Text style={styles.rulerName}>{currentRuler.name}</Text>
 
-            {/* Ruler Image */}
+            {/* Ruler Image with dynamic source */}
             <Image
-              source={require('../../assets/image/royal/henry.png')} // You'll need to handle dynamic image imports
+              source={getImageSource(currentRuler.imagePath)}
               style={styles.rulerImage}
               resizeMode="contain"
             />
@@ -246,27 +264,40 @@ const handleStepIntoHistory = () => {
           </View>
         </Modal>
 
-        {/* Selected Filters Display */}
-        <View style={styles.selectedFiltersContainer}>
-          {Object.entries(selectedFilters).map(
-            ([category, value]) =>
-              value && (
-                <View key={category} style={styles.selectedFilterTag}>
-                  <Text style={styles.selectedFilterText}>{value}</Text>
-                </View>
-              ),
-          )}
-        </View>
+        {/* Navigation conteiner */}
+        {filteredRulers.length > 0 && (
+          <View style={styles.navigationContainer}>
+            <TouchableOpacity
+              onPress={handlePrevious}
+              style={[
+                styles.navButton,
+                currentRulerIndex === 0 && styles.navButtonDisabled,
+              ]}>
+              <Text style={styles.navButtonText}>Previous</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleNext}
+              style={[
+                styles.navButton,
+                currentRulerIndex === filteredRulers.length - 1 &&
+                  styles.navButtonDisabled,
+              ]}>
+              <Text style={styles.navButtonText}>Next</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         <TouchableOpacity
           style={styles.stepButton}
           onPress={() => {
-            handleStepIntoHistory();
+            console.log(currentRuler);
             /* Handle navigation to detail screen */
           }}>
           <Text style={styles.stepButtonText}>Step into History</Text>
-        </TouchableOpacity>
-      </View>
+          </TouchableOpacity>
+        </View>
+      {/* </ScrollView> */}
+      {/* </SafeAreaView> */}
     </MainLayout>
   );
 };
@@ -277,7 +308,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    paddingTop: 40,
+    paddingTop: 10,
   },
   timelineContainer: {
     marginVertical: 50,
@@ -317,7 +348,7 @@ const styles = StyleSheet.create({
     // position: 'absolute',
     right: 0,
     // top: -11,
-    margin: 20,
+    // margin: 10,
     alignSelf: 'flex-end',
   },
   filterCategories: {
@@ -416,7 +447,7 @@ const styles = StyleSheet.create({
   selectedFiltersContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    padding: 10,
+    // padding: 10,
     gap: 10,
   },
   selectedFilterTag: {
@@ -441,9 +472,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
-    position: 'absolute',
-    top: 20,
-    paddingHorizontal: 20,
+    // position: 'absolute',
+    // top: 20,
+    // paddingHorizontal: 20,d
   },
   navButton: {
     padding: 10,
@@ -459,12 +490,12 @@ const styles = StyleSheet.create({
   rulerName: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 10,
     color: '#000',
   },
   rulerImage: {
     width: '100%',
-    height: 400,
+    height: '90%',
     borderRadius: 20,
   },
   stepButton: {
@@ -472,11 +503,22 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 25,
-    marginBottom: 20,
+    marginBottom: 10,
     alignSelf: 'center',
   },
   stepButtonText: {
     color: '#FFF',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  headerIconContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: 20,
+  },
+  navButtonText: {
+    color: '#C5A572',
     fontSize: 18,
     fontWeight: '600',
   },
