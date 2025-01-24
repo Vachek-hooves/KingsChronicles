@@ -15,6 +15,7 @@ import {RoyalData} from '../../data/RoyalData';
 
 const FilterScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [fullScreenModalVisible, setFullScreenModalVisible] = useState(false);
   const [activeFilter, setActiveFilter] = useState('dynasty'); // dynasty, region, era
   const [selectedFilters, setSelectedFilters] = useState({
     dynasty: null,
@@ -133,7 +134,7 @@ const FilterScreen = () => {
   return (
     <MainLayout>
       <SafeAreaView style={{flex: 1}}>
-        <ScrollView style={{flex: 1}}>
+        <ScrollView style={{flex: 1}} showsVerticalScrollIndicator={false}>
           <View style={styles.container}>
             {/* Timeline Design */}
             <View style={styles.timelineContainer}>
@@ -143,14 +144,31 @@ const FilterScreen = () => {
               />
             </View>
 
-            {/* Filter Icon */}
+            {/* Filter Icon and Fullscreen Icon */}
             <View style={styles.headerIconContainer}>
-              <TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setFullScreenModalVisible(true)}
+                style={styles.iconButton}>
                 <Image
                   source={require('../../assets/image/icons/fullScreen.png')}
                   style={styles.filterIcon}
                 />
               </TouchableOpacity>
+
+              {/* Selected Filters Display */}
+              <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+              <View style={styles.selectedFiltersContainer}>
+                {Object.entries(selectedFilters).map(
+                  ([category, value]) =>
+                    value && (
+                        <View key={category} style={styles.selectedFilterTag}>
+                          <Text style={styles.selectedFilterText}>{value}</Text>
+                        </View>
+                    ),
+                )}
+              </View>
+                </ScrollView>
+
               <TouchableOpacity
                 onPress={() => setModalVisible(true)}
                 style={styles.filterIconContainer}>
@@ -159,18 +177,6 @@ const FilterScreen = () => {
                   style={styles.filterIcon}
                 />
               </TouchableOpacity>
-            </View>
-
-            {/* Selected Filters Display */}
-            <View style={styles.selectedFiltersContainer}>
-              {Object.entries(selectedFilters).map(
-                ([category, value]) =>
-                  value && (
-                    <View key={category} style={styles.selectedFilterTag}>
-                      <Text style={styles.selectedFilterText}>{value}</Text>
-                    </View>
-                  ),
-              )}
             </View>
 
             {/* Ruler Display */}
@@ -294,6 +300,48 @@ const FilterScreen = () => {
               ))}
             </ScrollView>
           </View>
+        </View>
+      </Modal>
+
+      {/* Fullscreen Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={fullScreenModalVisible}
+        onRequestClose={() => setFullScreenModalVisible(false)}>
+        <View style={styles.fullScreenModal}>
+          <ScrollView style={styles.fullScreenScrollView}>
+            {/* Close Button */}
+            <TouchableOpacity
+              style={styles.closeFullScreenButton}
+              onPress={() => setFullScreenModalVisible(false)}>
+              {/* <Image
+                source={require('../../assets/image/icons/close.png')}
+                style={styles.closeIcon}
+              /> */}
+              <Text style={styles.closeButtonText}>✕</Text>
+            </TouchableOpacity>
+
+            {/* Full Screen Image */}
+            {currentRuler && (
+              <View style={styles.fullScreenContent}>
+                <Image
+                  source={getImageSource(currentRuler.imagePath)}
+                  style={styles.fullScreenImage}
+                  resizeMode="contain"
+                />
+                <View style={styles.fullScreenTextContainer}>
+                  <Text style={styles.fullScreenTitle}>
+                    {currentRuler.name}
+                  </Text>
+                  <Text style={styles.fullScreenYear}>{currentRuler.year}</Text>
+                  <Text style={styles.fullScreenAbout}>
+                    {currentRuler.about}
+                  </Text>
+                </View>
+              </View>
+            )}
+          </ScrollView>
         </View>
       </Modal>
     </MainLayout>
@@ -469,9 +517,65 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     padding: 10,
+    backgroundColor: '#C5A572',
+    borderRadius: 20,
   },
   closeButtonText: {
-    fontSize: 20,
+    fontSize: 30,
+    color: '#000',
+  },
+  fullScreenModal: {
+    flex: 1,
+    backgroundColor: '#FFF',
+  },
+  fullScreenScrollView: {
+    flex: 1,
+  },
+  closeFullScreenButton: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    zIndex: 1,
+    padding: 10,
+    backgroundColor: '#C5A572',
+    borderRadius: 20,
+  },
+  closeIcon: {
+    width: 24,
+    height: 24,
+    tintColor: '#000',
+  },
+  fullScreenContent: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  fullScreenImage: {
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height * 0.7,
+    marginBottom: 10,
+  },
+  fullScreenTextContainer: {
+    padding: 20,
+    width: '100%',
+  },
+  fullScreenTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#000',
+    marginBottom: 8,
+  },
+  fullScreenYear: {
+    fontSize: 18,
     color: '#666',
+    marginBottom: 16,
+  },
+  fullScreenAbout: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#333',
+    marginBottom: 40,
+  },
+  iconButton: {
+    padding: 10,
   },
 });
