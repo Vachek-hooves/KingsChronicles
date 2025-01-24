@@ -145,7 +145,7 @@ const LoginScreen = ({navigation}) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.continueButton}
-              onPress={() => navigation.navigate('TabBarNavigation')}>
+              onPress={() => navigation.navigate('PromotionScreen')}>
               <Text style={styles.continueButtonText}>Continues</Text>
             </TouchableOpacity>
           </>
