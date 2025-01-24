@@ -5,20 +5,23 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  Alert,ScrollView
+  Alert,
+  ScrollView,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {launchImageLibrary} from 'react-native-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MainLayout from '../../components/Layout/MainLayout';
 
-const LoginScreen = () => {
+const LoginScreen = ({navigation}) => {
   const [userData, setUserData] = useState({
     nickname: '',
     // age: '',
     profileImage: null,
     id: new Date().getTime().toString(),
   });
+  const [isEditing, setIsEditing] = useState(false);
+  const [userExists, setUserExists] = useState(false);
 
   useEffect(() => {
     getUserData();
@@ -29,6 +32,7 @@ const LoginScreen = () => {
       const jsonValue = await AsyncStorage.getItem('@user_data');
       if (jsonValue != null) {
         setUserData(JSON.parse(jsonValue));
+        setUserExists(true);
       }
     } catch (error) {
       console.error('Error reading user data:', error);
@@ -37,16 +41,32 @@ const LoginScreen = () => {
 
   const saveUserData = async () => {
     try {
-      if (!userData.nickname ) {
-        Alert.alert('Error', 'Please fill in all fields');
+      if (!userData.nickname) {
+        Alert.alert('Error', 'Please enter a nickname');
         return;
       }
       await AsyncStorage.setItem('@user_data', JSON.stringify(userData));
-      Alert.alert('Success', 'Account created successfully!');
+      setUserExists(true);
+      setIsEditing(false);
+      Alert.alert(
+        'Success',
+        isEditing
+          ? 'Profile updated successfully!'
+          : 'Account created successfully!',
+      );
     } catch (error) {
       console.error('Error saving user data:', error);
       Alert.alert('Error', 'Failed to save user data');
     }
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const cancelEdit = () => {
+    getUserData(); // Reset to saved data
+    setIsEditing(false);
   };
 
   const deleteAccount = async () => {
@@ -89,53 +109,112 @@ const LoginScreen = () => {
 
   return (
     <MainLayout>
-      <ScrollView    style={styles.container}>
-        <TouchableOpacity onPress={deleteAccount} style={styles.deleteButton}>
-          <Text style={styles.deleteText}>Delete account</Text>
-        </TouchableOpacity>
+      <ScrollView style={styles.container}>
+        {userExists && !isEditing ? (
+          // View Mode
+          <>
+            <View style={styles.headerButtons}>
+              <TouchableOpacity
+                onPress={deleteAccount}
+                style={styles.deleteButton}>
+                <Text style={styles.deleteText}>Delete account</Text>
+              </TouchableOpacity>
+            </View>
 
-        <TouchableOpacity onPress={selectImage} style={styles.imageContainer}>
-          {userData.profileImage ? (
-            <Image
-              source={{uri: userData.profileImage}}
-              style={styles.profileImage}
-            />
-          ) : (
-            <View style={styles.defaultImage}>
-              <Image
-                source={require('../../assets/image/loginScreen/defaultAvatar.png')}
-                style={styles.profileImage}
+            <View style={styles.imageContainer}>
+              {userData.profileImage ? (
+                <Image
+                  source={{uri: userData.profileImage}}
+                  style={styles.profileImage}
+                />
+              ) : (
+                <Image
+                  source={require('../../assets/image/loginScreen/defaultAvatar.png')}
+                  style={styles.profileImage}
+                />
+              )}
+            </View>
+
+            <View style={styles.userInfo}>
+              <Text style={styles.nicknameDisplay}>{userData.nickname}</Text>
+            </View>
+            <TouchableOpacity
+              onPress={handleEdit}
+              style={styles.editButton}>
+              <Text style={styles.editText}>Edit profile</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.continueButton}
+              onPress={() => navigation.navigate('TabBarNavigation')}>
+              <Text style={styles.continueButtonText}>Continues</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          // Edit/Create Mode
+          <>
+            {isEditing && (
+              <View style={styles.headerButtons}>
+                <TouchableOpacity
+                  onPress={cancelEdit}
+                  style={styles.cancelButton}>
+                  <Text style={styles.cancelText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={deleteAccount}
+                  style={styles.deleteButton}>
+                  <Text style={styles.deleteText}>Delete account</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            <TouchableOpacity
+              onPress={selectImage}
+              style={styles.imageContainer}>
+              {userData.profileImage ? (
+                <Image
+                  source={{uri: userData.profileImage}}
+                  style={styles.profileImage}
+                />
+              ) : (
+                <Image
+                  source={require('../../assets/image/loginScreen/defaultAvatar.png')}
+                  style={styles.profileImage}
+                />
+              )}
+            </TouchableOpacity>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Nickname</Text>
+              <TextInput
+                style={styles.input}
+                value={userData.nickname}
+                onChangeText={text =>
+                  setUserData(prev => ({...prev, nickname: text}))
+                }
+                placeholder="Enter nickname"
               />
             </View>
-          )}
-        </TouchableOpacity>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Nickname</Text>
-          <TextInput
-            style={styles.input}
-            value={userData.nickname}
-            onChangeText={text =>
-              setUserData(prev => ({...prev, nickname: text}))
-            }
-            placeholder="Enter nickname"
-          />
-        </View>
+            {/* <View style={styles.inputContainer}>
+              <Text style={styles.label}>Age</Text>
+              <TextInput
+                style={styles.input}
+                value={userData.age}
+                onChangeText={text => setUserData(prev => ({...prev, age: text}))}
+                placeholder="Enter age"
+                keyboardType="numeric"
+              />
+            </View> */}
 
-        {/* <View style={styles.inputContainer}>
-          <Text style={styles.label}>Age</Text>
-          <TextInput
-            style={styles.input}
-            value={userData.age}
-            onChangeText={text => setUserData(prev => ({...prev, age: text}))}
-            placeholder="Enter age"
-            keyboardType="numeric"
-          />
-        </View> */}
-
-        <TouchableOpacity style={styles.createButton} onPress={saveUserData}>
-          <Text style={styles.createButtonText}>Create account</Text>
-        </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.createButton}
+              onPress={saveUserData}>
+              <Text style={styles.createButtonText}>
+                {isEditing ? 'Save changes' : 'Create account'}
+              </Text>
+            </TouchableOpacity>
+          </>
+        )}
       </ScrollView>
     </MainLayout>
   );
@@ -144,6 +223,32 @@ const LoginScreen = () => {
 export default LoginScreen;
 
 const styles = StyleSheet.create({
+  editButton: {
+    // backgroundColor: '#C5A572',
+    paddingVertical: 15,
+    borderRadius: 25,
+    marginTop: 20,
+    borderWidth: 3,
+    borderColor: '#C5A572',
+  },
+  editText: {
+    color: '#C5A572',
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  continueButton: {
+    backgroundColor: '#C5A572',
+    paddingVertical: 15,
+    borderRadius: 25,
+    marginTop: 20,
+  },
+  continueButtonText: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
   container: {
     flex: 1,
     padding: 20,
@@ -201,5 +306,38 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     textAlign: 'center',
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+//   editButton: {
+//     padding: 10,
+//     marginRight: 10,
+//   },
+//   editText: {
+//     color: '#C5A572',
+//     fontSize: 16,
+//     fontWeight: '600',
+//   },
+  cancelButton: {
+    padding: 10,
+    marginRight: 10,
+  },
+  cancelText: {
+    color: '#666',
+    fontSize: 16,
+  },
+  nicknameDisplay: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  userInfo: {
+    alignItems: 'center',
   },
 });
