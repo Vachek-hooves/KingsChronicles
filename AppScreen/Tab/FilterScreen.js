@@ -89,7 +89,9 @@ const FilterScreen = () => {
 
   // Image mapping function
   const getImageSource = imagePath => {
+    // console.log(imagePath.split('/').pop().split('.'));
     const imageName = imagePath.split('/').pop().split('.')[0];
+    // console.log(imageName);
     switch (imageName) {
       case 'henry':
         return require('../../assets/image/royal/henry.png');
@@ -130,174 +132,170 @@ const FilterScreen = () => {
 
   return (
     <MainLayout>
-      {/* <SafeAreaView style={{flex: 1}}> */}
-        {/* <ScrollView style={{flex: 1}}> */}
-      <View style={styles.container}>
-        {/* Timeline Design */}
-        <View style={styles.timelineContainer}>
-          {/* <View style={styles.timeline}> */}
-          {/* <View style={styles.timelineLine} /> */}
-          {/* <View style={[styles.timelineDot, {left: '25%'}]} /> */}
-          <Image
-            source={require('../../assets/image/ui/hourglass.png')}
-            style={styles.hourglassIcon}
-          />
-          {/* <View style={[styles.timelineDot, {right: '25%'}]} /> */}
-          {/* </View> */}
-        </View>
+      <SafeAreaView style={{flex: 1}}>
+        <ScrollView style={{flex: 1}}>
+          <View style={styles.container}>
+            {/* Timeline Design */}
+            <View style={styles.timelineContainer}>
+              <Image
+                source={require('../../assets/image/ui/hourglass.png')}
+                style={styles.hourglassIcon}
+              />
+            </View>
 
-        {/* Filter Icon */}
-        <View style={styles.headerIconContainer}>
-          <TouchableOpacity>
-            <Image
-              source={require('../../assets/image/icons/fullScreen.png')}
-              style={styles.filterIcon}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setModalVisible(true)}
-            style={styles.filterIconContainer}>
-            <Image
-              source={require('../../assets/image/icons/filter.png')}
-              style={styles.filterIcon}
-            />
-          </TouchableOpacity>
-        </View>
-        {/* Selected Filters Display */}
-        <View style={styles.selectedFiltersContainer}>
-          {Object.entries(selectedFilters).map(
-            ([category, value]) =>
-              value && (
-                <View key={category} style={styles.selectedFilterTag}>
-                  <Text style={styles.selectedFilterText}>{value}</Text>
-                </View>
-              ),
-          )}
-        </View>
+            {/* Filter Icon */}
+            <View style={styles.headerIconContainer}>
+              <TouchableOpacity>
+                <Image
+                  source={require('../../assets/image/icons/fullScreen.png')}
+                  style={styles.filterIcon}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setModalVisible(true)}
+                style={styles.filterIconContainer}>
+                <Image
+                  source={require('../../assets/image/icons/filter.png')}
+                  style={styles.filterIcon}
+                />
+              </TouchableOpacity>
+            </View>
 
-        {/* Ruler Display */}
-        {filteredRulers.length > 0 && (
-          <View style={styles.rulerContainer}>
-            {/* Ruler Name */}
-            <Text style={styles.rulerName}>{currentRuler.name}</Text>
+            {/* Selected Filters Display */}
+            <View style={styles.selectedFiltersContainer}>
+              {Object.entries(selectedFilters).map(
+                ([category, value]) =>
+                  value && (
+                    <View key={category} style={styles.selectedFilterTag}>
+                      <Text style={styles.selectedFilterText}>{value}</Text>
+                    </View>
+                  ),
+              )}
+            </View>
 
-            {/* Ruler Image with dynamic source */}
-            <Image
-              source={getImageSource(currentRuler.imagePath)}
-              style={styles.rulerImage}
-              resizeMode="contain"
-            />
-          </View>
-        )}
+            {/* Ruler Display */}
+            {filteredRulers.length > 0 && (
+              <View style={styles.rulerContainer}>
+                {/* Ruler Name */}
+                <Text style={styles.rulerName}>{currentRuler.name}</Text>
 
-        {/* Filter Modal */}
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              {/* Modal Header */}
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Filters</Text>
+                {/* Ruler Image */}
+                <Image
+                  source={getImageSource(currentRuler.imagePath)}
+                  style={styles.rulerImage}
+                  resizeMode="contain"
+                />
+              </View>
+            )}
+
+            {/* Navigation Container */}
+            {filteredRulers.length > 0 && (
+              <View style={styles.navigationContainer}>
                 <TouchableOpacity
-                  onPress={() => setModalVisible(false)}
-                  style={styles.closeButton}>
-                  <Text style={styles.closeButtonText}>✕</Text>
+                  onPress={handlePrevious}
+                  style={[
+                    styles.navButton,
+                    currentRulerIndex === 0 && styles.navButtonDisabled,
+                  ]}>
+                  <Text style={styles.navButtonText}>Previous</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={handleNext}
+                  style={[
+                    styles.navButton,
+                    currentRulerIndex === filteredRulers.length - 1 &&
+                      styles.navButtonDisabled,
+                  ]}>
+                  <Text style={styles.navButtonText}>Next</Text>
                 </TouchableOpacity>
               </View>
+            )}
 
-              {/* Filter Categories */}
-              <View style={styles.filterCategories}>
-                {['dynasty', 'region', 'era'].map(category => (
-                  <TouchableOpacity
-                    key={category}
-                    style={[
-                      styles.categoryButton,
-                      activeFilter === category && styles.activeCategory,
-                    ]}
-                    onPress={() => setActiveFilter(category)}>
-                    <Text
-                      style={[
-                        styles.categoryText,
-                        activeFilter === category && styles.activeCategoryText,
-                      ]}>
-                      {category.charAt(0).toUpperCase() + category.slice(1)}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
+            <TouchableOpacity
+              style={styles.stepButton}
+              onPress={() => {
+                console.log(currentRuler);
+                /* Handle navigation to detail screen */
+              }}>
+              <Text style={styles.stepButtonText}>Step into History</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
 
-              {/* Filter Items with Toggle Functionality */}
-              <ScrollView style={styles.filterList}>
-                {filters[activeFilter].map((filter, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={[
-                      styles.filterItem,
-                      selectedFilters[activeFilter] === filter.name &&
-                        styles.selectedFilterItem,
-                    ]}
-                    onPress={() => handleFilterSelect(filter.name)}>
-                    <Text
-                      style={[
-                        styles.filterName,
-                        selectedFilters[activeFilter] === filter.name &&
-                          styles.selectedFilterText,
-                      ]}>
-                      {filter.name}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.filterCount,
-                        selectedFilters[activeFilter] === filter.name &&
-                          styles.selectedFilterText,
-                      ]}>
-                      {filter.rulers.length}{' '}
-                      {filter.rulers.length === 1 ? 'ruler' : 'rulers'}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
+      {/* Filter Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            {/* Modal Header */}
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Filters</Text>
+              <TouchableOpacity
+                onPress={() => setModalVisible(false)}
+                style={styles.closeButton}>
+                <Text style={styles.closeButtonText}>✕</Text>
+              </TouchableOpacity>
             </View>
-          </View>
-        </Modal>
 
-        {/* Navigation conteiner */}
-        {filteredRulers.length > 0 && (
-          <View style={styles.navigationContainer}>
-            <TouchableOpacity
-              onPress={handlePrevious}
-              style={[
-                styles.navButton,
-                currentRulerIndex === 0 && styles.navButtonDisabled,
-              ]}>
-              <Text style={styles.navButtonText}>Previous</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleNext}
-              style={[
-                styles.navButton,
-                currentRulerIndex === filteredRulers.length - 1 &&
-                  styles.navButtonDisabled,
-              ]}>
-              <Text style={styles.navButtonText}>Next</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+            {/* Filter Categories */}
+            <View style={styles.filterCategories}>
+              {['dynasty', 'region', 'era'].map(category => (
+                <TouchableOpacity
+                  key={category}
+                  style={[
+                    styles.categoryButton,
+                    activeFilter === category && styles.activeCategory,
+                  ]}
+                  onPress={() => setActiveFilter(category)}>
+                  <Text
+                    style={[
+                      styles.categoryText,
+                      activeFilter === category && styles.activeCategoryText,
+                    ]}>
+                    {category.charAt(0).toUpperCase() + category.slice(1)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
 
-        <TouchableOpacity
-          style={styles.stepButton}
-          onPress={() => {
-            console.log(currentRuler);
-            /* Handle navigation to detail screen */
-          }}>
-          <Text style={styles.stepButtonText}>Step into History</Text>
-          </TouchableOpacity>
+            {/* Filter Items with Toggle Functionality */}
+            <ScrollView style={styles.filterList}>
+              {filters[activeFilter].map((filter, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.filterItem,
+                    selectedFilters[activeFilter] === filter.name &&
+                      styles.selectedFilterItem,
+                  ]}
+                  onPress={() => handleFilterSelect(filter.name)}>
+                  <Text
+                    style={[
+                      styles.filterName,
+                      selectedFilters[activeFilter] === filter.name &&
+                        styles.selectedFilterText,
+                    ]}>
+                    {filter.name}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.filterCount,
+                      selectedFilters[activeFilter] === filter.name &&
+                        styles.selectedFilterText,
+                    ]}>
+                    {filter.rulers.length}{' '}
+                    {filter.rulers.length === 1 ? 'ruler' : 'rulers'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
         </View>
-      {/* </ScrollView> */}
-      {/* </SafeAreaView> */}
+      </Modal>
     </MainLayout>
   );
 };
@@ -311,32 +309,10 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   timelineContainer: {
-    marginVertical: 50,
+    // marginVertical: 50,
     alignContent: 'center',
     alignItems: 'center',
-  },
-  timeline: {
-    height: 2,
-    backgroundColor: '#000',
-    position: 'relative',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  timelineLine: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 2,
-    backgroundColor: '#000',
-  },
-  timelineDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#C5A572',
-    position: 'absolute',
-    top: -4,
+    marginBottom: 40,
   },
   hourglassIcon: {
     position: 'absolute',
@@ -345,10 +321,7 @@ const styles = StyleSheet.create({
   filterIcon: {
     width: 34,
     height: 34,
-    // position: 'absolute',
     right: 0,
-    // top: -11,
-    // margin: 10,
     alignSelf: 'flex-end',
   },
   filterCategories: {
@@ -392,19 +365,83 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
   },
-  button: {
+  selectedFilterItem: {
+    backgroundColor: '#C5A572',
+    borderRadius: 10,
+  },
+  selectedFilterText: {
+    color: '#FFF',
+  },
+  selectedFiltersContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginVertical: 10,
+  },
+  selectedFilterTag: {
+    backgroundColor: '#C5A572',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  filterIconContainer: {
+    zIndex: 1,
+  },
+  rulerContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    // paddingHorizontal: 20,
+  },
+  navigationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginVertical: 20,
+  },
+  navButton: {
+    padding: 10,
+  },
+  navButtonDisabled: {
+    opacity: 0.5,
+  },
+  navIcon: {
+    width: 24,
+    height: 24,
+    tintColor: '#C5A572',
+  },
+  rulerName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#000',
+  },
+  rulerImage: {
+    width: '100%',
+    height: 450,
+    borderRadius: 20,
+  },
+  stepButton: {
     backgroundColor: '#C5A572',
     paddingVertical: 15,
-    paddingHorizontal: 20,
+    paddingHorizontal: 30,
     borderRadius: 25,
-    alignItems: 'center',
-    marginTop: 20,
-    position: 'absolute',
-    bottom: 30,
+    marginBottom: 20,
     alignSelf: 'center',
   },
-  buttonText: {
+  stepButtonText: {
     color: '#FFF',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  headerIconContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginVertical: 20,
+  },
+  navButtonText: {
+    color: '#C5A572',
     fontSize: 18,
     fontWeight: '600',
   },
@@ -436,90 +473,5 @@ const styles = StyleSheet.create({
   closeButtonText: {
     fontSize: 20,
     color: '#666',
-  },
-  selectedFilterItem: {
-    backgroundColor: '#C5A572',
-    borderRadius: 10,
-  },
-  selectedFilterText: {
-    color: '#FFF',
-  },
-  selectedFiltersContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    // padding: 10,
-    gap: 10,
-  },
-  selectedFilterTag: {
-    backgroundColor: '#C5A572',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  filterIconContainer: {
-    // position: 'absolute',
-    // right: 20,
-    // top: 40,
-    zIndex: 1,
-  },
-  rulerContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-  },
-  navigationContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    // position: 'absolute',
-    // top: 20,
-    // paddingHorizontal: 20,d
-  },
-  navButton: {
-    padding: 10,
-  },
-  navButtonDisabled: {
-    opacity: 0.5,
-  },
-  navIcon: {
-    width: 24,
-    height: 24,
-    tintColor: '#C5A572',
-  },
-  rulerName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#000',
-  },
-  rulerImage: {
-    width: '100%',
-    height: '90%',
-    borderRadius: 20,
-  },
-  stepButton: {
-    backgroundColor: '#C5A572',
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-    borderRadius: 25,
-    marginBottom: 10,
-    alignSelf: 'center',
-  },
-  stepButtonText: {
-    color: '#FFF',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  headerIconContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    marginTop: 20,
-  },
-  navButtonText: {
-    color: '#C5A572',
-    fontSize: 18,
-    fontWeight: '600',
   },
 });
