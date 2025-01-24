@@ -5,12 +5,19 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  Modal,
 } from 'react-native';
 import React, {useState} from 'react';
 import MainLayout from '../../components/Layout/MainLayout';
 
 const FilterScreen = () => {
+  const [modalVisible, setModalVisible] = useState(false);
   const [activeFilter, setActiveFilter] = useState('dynasty'); // dynasty, region, era
+  const [selectedFilters, setSelectedFilters] = useState({
+    dynasty: null,
+    region: null,
+    era: null,
+  });
 
   const filters = {
     dynasty: [
@@ -72,6 +79,19 @@ const FilterScreen = () => {
     ],
   };
 
+  const handleFilterSelect = filterName => {
+    setSelectedFilters(prev => ({
+      ...prev,
+      [activeFilter]: filterName,
+    }));
+  };
+
+  const handleStepIntoHistory = () => {
+    // Here you can handle the navigation with selected filters
+    console.log('Selected filters:', selectedFilters);
+    // navigation.navigate('HistoryScreen', { filters: selectedFilters });
+  };
+
   return (
     <MainLayout>
       <View style={styles.container}>
@@ -82,76 +102,104 @@ const FilterScreen = () => {
             style={styles.hourglassIcon}
           />
         </View>
-        <Image
-          source={require('../../assets/image/icons/filter.png')}
-          style={styles.filterIcon}
-        />
 
-        {/* Filter Categories */}
-        <View style={styles.filterCategories}>
-          <TouchableOpacity
-            style={[
-              styles.categoryButton,
-              activeFilter === 'dynasty' && styles.activeCategory,
-            ]}
-            onPress={() => setActiveFilter('dynasty')}>
-            <Text
-              style={[
-                styles.categoryText,
-                activeFilter === 'dynasty' && styles.activeCategoryText,
-              ]}>
-              Dynasty
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.categoryButton,
-              activeFilter === 'region' && styles.activeCategory,
-            ]}
-            onPress={() => setActiveFilter('region')}>
-            <Text
-              style={[
-                styles.categoryText,
-                activeFilter === 'region' && styles.activeCategoryText,
-              ]}>
-              Region
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.categoryButton,
-              activeFilter === 'era' && styles.activeCategory,
-            ]}
-            onPress={() => setActiveFilter('era')}>
-            <Text
-              style={[
-                styles.categoryText,
-                activeFilter === 'era' && styles.activeCategoryText,
-              ]}>
-              Era
-            </Text>
-          </TouchableOpacity>
+        {/* Filter Icon */}
+        <TouchableOpacity
+          onPress={() => setModalVisible(true)}
+          style={styles.filterIconContainer}>
+          <Image
+            source={require('../../assets/image/icons/filter.png')}
+            style={styles.filterIcon}
+          />
+        </TouchableOpacity>
+
+        {/* Filter Modal */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              {/* Modal Header */}
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Filters</Text>
+                <TouchableOpacity
+                  onPress={() => setModalVisible(false)}
+                  style={styles.closeButton}>
+                  <Text style={styles.closeButtonText}>✕</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Filter Categories */}
+              <View style={styles.filterCategories}>
+                {['dynasty', 'region', 'era'].map(category => (
+                  <TouchableOpacity
+                    key={category}
+                    style={[
+                      styles.categoryButton,
+                      activeFilter === category && styles.activeCategory,
+                    ]}
+                    onPress={() => setActiveFilter(category)}>
+                    <Text
+                      style={[
+                        styles.categoryText,
+                        activeFilter === category && styles.activeCategoryText,
+                      ]}>
+                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Filter Items */}
+              <ScrollView style={styles.filterList}>
+                {filters[activeFilter].map((filter, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={[
+                      styles.filterItem,
+                      selectedFilters[activeFilter] === filter.name &&
+                        styles.selectedFilterItem,
+                    ]}
+                    onPress={() => handleFilterSelect(filter.name)}>
+                    <Text
+                      style={[
+                        styles.filterName,
+                        selectedFilters[activeFilter] === filter.name &&
+                          styles.selectedFilterText,
+                      ]}>
+                      {filter.name}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.filterCount,
+                        selectedFilters[activeFilter] === filter.name &&
+                          styles.selectedFilterText,
+                      ]}>
+                      {filter.rulers.length}{' '}
+                      {filter.rulers.length === 1 ? 'ruler' : 'rulers'}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Selected Filters Display */}
+        <View style={styles.selectedFiltersContainer}>
+          {Object.entries(selectedFilters).map(
+            ([category, value]) =>
+              value && (
+                <View key={category} style={styles.selectedFilterTag}>
+                  <Text style={styles.selectedFilterText}>{value}</Text>
+                </View>
+              ),
+          )}
         </View>
 
-        {/* Filter Items */}
-        <ScrollView style={styles.filterList}>
-          {filters[activeFilter].map((filter, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.filterItem}
-              onPress={() => {
-                // Handle filter selection
-              }}>
-              <Text style={styles.filterName}>{filter.name}</Text>
-              <Text style={styles.filterCount}>
-                {filter.rulers.length}{' '}
-                {filter.rulers.length === 1 ? 'ruler' : 'rulers'}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={handleStepIntoHistory}>
           <Text style={styles.buttonText}>Step into History</Text>
         </TouchableOpacity>
       </View>
@@ -256,10 +304,67 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     alignItems: 'center',
     marginTop: 20,
+    position: 'absolute',
+    bottom: 30,
+    alignSelf: 'center',
   },
   buttonText: {
     color: '#FFF',
     fontSize: 18,
     fontWeight: '600',
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    height: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+  },
+  closeButton: {
+    padding: 10,
+  },
+  closeButtonText: {
+    fontSize: 20,
+    color: '#666',
+  },
+  selectedFilterItem: {
+    backgroundColor: '#C5A572',
+    borderRadius: 10,
+  },
+  selectedFilterText: {
+    color: '#FFF',
+  },
+  selectedFiltersContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    padding: 10,
+    gap: 10,
+  },
+  selectedFilterTag: {
+    backgroundColor: '#C5A572',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  filterIconContainer: {
+    // position: 'absolute',
+    // right: 20,
+    // top: 40,
+    zIndex: 1,
   },
 });
