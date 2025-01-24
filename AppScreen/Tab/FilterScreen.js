@@ -82,7 +82,7 @@ const FilterScreen = () => {
   const handleFilterSelect = filterName => {
     setSelectedFilters(prev => ({
       ...prev,
-      [activeFilter]: filterName,
+      [activeFilter]: prev[activeFilter] === filterName ? null : filterName,
     }));
   };
 
@@ -152,7 +152,7 @@ const FilterScreen = () => {
                 ))}
               </View>
 
-              {/* Filter Items */}
+              {/* Filter Items with Toggle Functionality */}
               <ScrollView style={styles.filterList}>
                 {filters[activeFilter].map((filter, index) => (
                   <TouchableOpacity
