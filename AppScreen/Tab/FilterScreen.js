@@ -7,8 +7,9 @@ import {
   Image,
   Modal,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import MainLayout from '../../components/Layout/MainLayout';
+import {RoyalData} from '../../data/RoyalData';
 
 const FilterScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -19,64 +20,30 @@ const FilterScreen = () => {
     era: null,
   });
 
+  // Create filters object from RoyalData
   const filters = {
-    dynasty: [
-      {name: 'Tudors', rulers: ['Henry VIII', 'Elizabeth I']},
-      {name: 'Bourbons', rulers: ['Louis XIV']},
-      {name: 'Romanovs', rulers: ['Catherine II', 'Peter the Great']},
-      {name: 'Carolingians', rulers: ['Charlemagne', 'Clovis I']},
-      {name: 'Habsburgs', rulers: ['Philip II', 'Maria Theresa']},
-      {name: 'Bonapartes', rulers: ['Napoleon Bonaparte']},
-    ],
-    region: [
-      {
-        name: 'England',
-        rulers: ['Henry VIII', 'Elizabeth I', 'Victoria', 'Alfred the Great'],
-      },
-      {
-        name: 'France',
-        rulers: ['Louis XIV', 'Napoleon Bonaparte', 'Charlemagne'],
-      },
-      {
-        name: 'Russia',
-        rulers: ['Catherine II', 'Peter the Great', 'Ivan the Terrible'],
-      },
-      {name: 'Ottoman Empire', rulers: ['Suleiman the Magnificent']},
-      {name: 'Holy Roman Empire', rulers: ['Charlemagne', 'Maria Theresa']},
-      {name: 'Ancient Macedonia', rulers: ['Alexander the Great']},
-    ],
-    era: [
-      {
-        name: 'Middle Ages',
-        rulers: [
-          'Alfred the Great',
-          'Clovis I',
-          'Charlemagne',
-          'Ivan the Terrible',
-        ],
-      },
-      {
-        name: 'Renaissance',
-        rulers: [
-          'Henry VIII',
-          'Elizabeth I',
-          'Philip II',
-          'Suleiman the Magnificent',
-        ],
-      },
-      {
-        name: 'Enlightenment',
-        rulers: [
-          'Catherine II',
-          'Peter the Great',
-          'Frederick II',
-          'Maria Theresa',
-        ],
-      },
-      {name: 'Napoleonic Era', rulers: ['Napoleon Bonaparte']},
-      {name: 'Victorian Era', rulers: ['Queen Victoria']},
-      {name: 'Antiquity', rulers: ['Alexander the Great']},
-    ],
+    dynasty: Array.from(new Set(RoyalData.map(ruler => ruler.dynasty))).map(
+      dynastyName => ({
+        name: dynastyName,
+        rulers: RoyalData.filter(ruler => ruler.dynasty === dynastyName).map(
+          ruler => ruler.name,
+        ),
+      }),
+    ),
+    region: Array.from(new Set(RoyalData.map(ruler => ruler.region))).map(
+      regionName => ({
+        name: regionName,
+        rulers: RoyalData.filter(ruler => ruler.region === regionName).map(
+          ruler => ruler.name,
+        ),
+      }),
+    ),
+    era: Array.from(new Set(RoyalData.map(ruler => ruler.era))).map(eraName => ({
+      name: eraName,
+      rulers: RoyalData.filter(ruler => ruler.era === eraName).map(
+        ruler => ruler.name,
+      ),
+    })),
   };
 
   const handleFilterSelect = filterName => {
@@ -87,9 +54,21 @@ const FilterScreen = () => {
   };
 
   const handleStepIntoHistory = () => {
-    // Here you can handle the navigation with selected filters
+    // Filter RoyalData based on selected filters
+    const filteredRulers = RoyalData.filter(ruler => {
+      const dynastyMatch =
+        !selectedFilters.dynasty || ruler.dynasty === selectedFilters.dynasty;
+      const regionMatch =
+        !selectedFilters.region || ruler.region === selectedFilters.region;
+      const eraMatch = !selectedFilters.era || ruler.era === selectedFilters.era;
+
+      return dynastyMatch && regionMatch && eraMatch;
+    });
+
     console.log('Selected filters:', selectedFilters);
-    // navigation.navigate('HistoryScreen', { filters: selectedFilters });
+    console.log('Filtered rulers:', filteredRulers);
+    // Later we can navigate with the filtered data:
+    // navigation.navigate('HistoryScreen', { filteredRulers });
   };
 
   return (
