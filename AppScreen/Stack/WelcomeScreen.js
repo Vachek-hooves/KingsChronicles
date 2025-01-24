@@ -40,11 +40,13 @@ export default WelcomeScreen;
 
 const styles = StyleSheet.create({
   progressContainer: {
-    width: '80%',
+    // width: '80%',
     height: 4,
     backgroundColor: '#FFD700',
     borderRadius: 2,
     overflow: 'hidden',
+    alignItems: 'center',
+    marginHorizontal: 20,
   },
   progressBar: {
     height: '100%',
