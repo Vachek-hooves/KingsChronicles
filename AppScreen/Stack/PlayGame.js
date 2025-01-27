@@ -119,6 +119,39 @@ const PlayGame = () => {
     })
   ).current;
 
+  const renderAimLine = () => {
+    if (!isDragging) return null;
+
+    return (
+      <>
+        {/* Direction line */}
+        <View
+          style={[
+            styles.aimLine,
+            {
+              width: 100,
+              transform: [{ rotate: `${aimAngle}rad` }],
+            },
+          ]}
+        />
+        {/* Arrow indicator at the end of line */}
+        <View
+          style={[
+            styles.aimArrowIndicator,
+            {
+              transform: [
+                { translateX: Math.cos(aimAngle) * 100 },
+                { translateY: Math.sin(aimAngle) * 100 },
+                { rotate: `${aimAngle}rad` },
+              ],
+            },
+          ]}>
+          <View style={styles.aimArrowHead} />
+        </View>
+      </>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -155,17 +188,7 @@ const PlayGame = () => {
               },
             ]}
           />
-          {isDragging && (
-            <View
-              style={[
-                styles.aimLine,
-                {
-                  width: 100, // Fixed length aim line
-                  transform: [{ rotate: `${aimAngle}rad` }],
-                },
-              ]}
-            />
-          )}
+          {renderAimLine()}
         </View>
 
         <TouchableOpacity
@@ -242,6 +265,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#C6A44E',
     top: ARCHER_SIZE / 2,
     left: ARCHER_SIZE / 2,
+  },
+  aimArrowIndicator: {
+    position: 'absolute',
+    top: ARCHER_SIZE / 2 - 5,
+    left: ARCHER_SIZE / 2,
+  },
+  aimArrowHead: {
+    width: 0,
+    height: 0,
+    backgroundColor: 'transparent',
+    borderStyle: 'solid',
+    borderLeftWidth: 5,
+    borderRightWidth: 5,
+    borderBottomWidth: 10,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: '#C6A44E',
+    transform: [{ rotate: '90deg' }],
   },
   shootButton: {
     position: 'absolute',
