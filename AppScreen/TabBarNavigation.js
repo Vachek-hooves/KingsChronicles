@@ -4,6 +4,7 @@ import FilterScreen from './Tab/FilterScreen';
 import RoyalScreen from './Tab/RoyalScreen';
 import BattleList from './Tab/BattleList';
 import Palace from './Tab/Palace';
+import Game from './Tab/Game';
 const Tab = createBottomTabNavigator();
 
 const TabBarNavigation = () => {
@@ -12,6 +13,7 @@ const TabBarNavigation = () => {
       <Tab.Screen name="FilterScreen" component={FilterScreen} />
       <Tab.Screen name="BattleList" component={BattleList} />
       <Tab.Screen name="Palace" component={Palace} />
+      <Tab.Screen name="Game" component={Game} />
     </Tab.Navigator>
   );
 };

@@ -9,6 +9,7 @@ import {
 import TabBarNavigation from './AppScreen/TabBarNavigation';
 import BattleScreen from './AppScreen/Stack/BattleScreen';
 import PalaceDetails from './AppScreen/Stack/PalaceDetails';
+import PlayGame from './AppScreen/Stack/PlayGame';
 
 const Stack = createNativeStackNavigator();
 
@@ -26,6 +27,7 @@ function App() {
         <Stack.Screen name="PromotionScreen" component={PromotionScreen} />
         <Stack.Screen name="BattleScreen" component={BattleScreen} />
         <Stack.Screen name="PalaceDetails" component={PalaceDetails} />
+        <Stack.Screen name="PlayGame" component={PlayGame} />
       </Stack.Navigator>
     </NavigationContainer>
   );
