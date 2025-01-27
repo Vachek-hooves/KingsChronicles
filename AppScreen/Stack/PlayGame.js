@@ -165,13 +165,11 @@ const PlayGame = () => {
     })
   ).current;
 
-  const renderDirectionControl = () => {
+  const renderAimLine = () => {
     if (!isDragging) return null;
 
     return (
-      <View style={styles.directionControl}>
-        {/* Base point for direction */}
-        <View style={styles.directionBase} />
+      <>
         {/* Direction line */}
         <View
           style={[
@@ -182,7 +180,7 @@ const PlayGame = () => {
             },
           ]}
         />
-        {/* Arrow indicator */}
+        {/* Arrow indicator at the end of line */}
         <View
           style={[
             styles.aimArrowIndicator,
@@ -196,8 +194,12 @@ const PlayGame = () => {
           ]}>
           <View style={styles.aimArrowHead} />
         </View>
-      </View>
+      </>
     );
+  };
+
+  const getPowerPercentage = () => {
+    return Math.round(((power - MIN_POWER) / (MAX_POWER - MIN_POWER)) * 100);
   };
 
   return (
@@ -208,24 +210,38 @@ const PlayGame = () => {
       </View>
 
       <View style={styles.gameArea} {...panResponder.panHandlers}>
-        {/* Power meter on left */}
-        <View style={styles.powerMeter}>
-          <View 
-            style={[
-              styles.powerLevel, 
-              { 
-                height: `${(power / MAX_POWER) * 100}%`,
-                backgroundColor: power > MAX_POWER * 0.7 ? '#FF4444' : 
-                               power > MAX_POWER * 0.4 ? '#FFB344' : '#44FF44'
-              }
-            ]} 
-          />
+        {/* Power meter with improved percentage display */}
+        <View style={styles.powerMeterContainer}>
+          <Text style={styles.powerLabel}>POWER</Text>
+          <View style={styles.powerMeter}>
+            <View 
+              style={[
+                styles.powerLevel, 
+                { 
+                  height: `${(power / MAX_POWER) * 100}%`,
+                  backgroundColor: power > MAX_POWER * 0.7 ? '#FF4444' : 
+                                 power > MAX_POWER * 0.4 ? '#FFB344' : '#44FF44'
+                }
+              ]} 
+            />
+            {/* Power level markers with percentages */}
+            <View style={[styles.powerMarker, { bottom: '75%' }]}>
+              <Text style={styles.markerText}>75%</Text>
+            </View>
+            <View style={[styles.powerMarker, { bottom: '50%' }]}>
+              <Text style={styles.markerText}>50%</Text>
+            </View>
+            <View style={[styles.powerMarker, { bottom: '25%' }]}>
+              <Text style={styles.markerText}>25%</Text>
+            </View>
+          </View>
+          <View style={styles.powerPercentageContainer}>
+            <Text style={styles.powerPercentage}>
+              {`${getPowerPercentage()}%`}
+            </Text>
+          </View>
         </View>
 
-        {/* Direction control on right */}
-        {renderDirectionControl()}
-
-        {/* Targets */}
         {targets.map((target) => (
           <View key={target.id}>
             <View
@@ -245,7 +261,19 @@ const PlayGame = () => {
           </View>
         ))}
 
-        {/* Archer and arrow */}
+        {/* Debug point to show where arrow lands */}
+        {debugPoint && (
+          <View
+            style={[
+              styles.debugPoint,
+              {
+                left: debugPoint.x,
+                top: debugPoint.y,
+              },
+            ]}
+          />
+        )}
+
         <View style={[styles.archer, { left: SCREEN_WIDTH / 2 - ARCHER_SIZE / 2 }]}>
           <Animated.View
             style={[
@@ -259,20 +287,8 @@ const PlayGame = () => {
               },
             ]}
           />
+          {renderAimLine()}
         </View>
-
-        {/* Debug point to show where arrow lands */}
-        {debugPoint && (
-          <View
-            style={[
-              styles.debugPoint,
-              {
-                left: debugPoint.x,
-                top: debugPoint.y,
-              },
-            ]}
-          />
-        )}
 
         <TouchableOpacity
           style={[
@@ -344,15 +360,40 @@ const styles = StyleSheet.create({
     top: ARCHER_SIZE / 2,
     left: ARCHER_SIZE / 2,
   },
+  aimLine: {
+    position: 'absolute',
+    height: 2,
+    backgroundColor: '#C6A44E',
+    top: ARCHER_SIZE / 2,
+    left: ARCHER_SIZE / 2,
+  },
+  aimArrowIndicator: {
+    position: 'absolute',
+    top: ARCHER_SIZE / 2 - 5,
+    left: ARCHER_SIZE / 2,
+  },
+  aimArrowHead: {
+    width: 0,
+    height: 0,
+    backgroundColor: 'transparent',
+    borderStyle: 'solid',
+    borderLeftWidth: 5,
+    borderRightWidth: 5,
+    borderBottomWidth: 10,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: '#C6A44E',
+    transform: [{ rotate: '90deg' }],
+  },
   shootButton: {
     position: 'absolute',
     bottom: 20,
-    // alignSelf: 'center',
     alignSelf: 'center',
     backgroundColor: '#C6A44E',
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 10,
+    zIndex: 999,
   },
   shootButtonText: {
     color: '#FFF',
@@ -391,70 +432,57 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     zIndex: 999,
   },
-  powerMeter: {
+  powerMeterContainer: {
     position: 'absolute',
     left: 20,
     bottom: 100,
+    alignItems: 'center',
+  },
+  powerLabel: {
+    color: '#171717',
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  powerMeter: {
     width: 20,
     height: 200,
     backgroundColor: '#E5E5E5',
     borderRadius: 10,
     overflow: 'hidden',
   },
+  powerMarker: {
+    position: 'absolute',
+    left: -5,
+    width: 30,
+    height: 2,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+  },
+  markerText: {
+    position: 'absolute',
+    left: -30,
+    top: -8,
+    fontSize: 12,
+    color: '#171717',
+  },
+  powerPercentageContainer: {
+    backgroundColor: '#171717',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 15,
+    marginTop: 10,
+  },
+  powerPercentage: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
   powerLevel: {
     position: 'absolute',
     bottom: 0,
     width: '100%',
-    backgroundColor: '#44FF44',
     borderRadius: 10,
-  },
-  powerIndicator: {
-    position: 'absolute',
-    left: -10,
-    width: 40,
-    height: 4,
-    backgroundColor: '#171717',
-  },
-  directionControl: {
-    position: 'absolute',
-    right: 40,
-    bottom: 100,
-    width: 120,
-    height: 120,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  directionBase: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#C6A44E',
-    borderWidth: 2,
-    borderColor: '#171717',
-  },
-  aimLine: {
-    position: 'absolute',
-    height: 2,
-    backgroundColor: '#C6A44E',
-    left: 10, // Half of directionBase width
-    transformOrigin: 'left',
-  },
-  aimArrowHead: {
-    width: 0,
-    height: 0,
-    backgroundColor: 'transparent',
-    borderStyle: 'solid',
-    borderLeftWidth: 5,
-    borderRightWidth: 5,
-    borderBottomWidth: 10,
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    borderBottomColor: '#C6A44E',
-    transform: [{ rotate: '90deg' }],
-  },
-  aimArrowIndicator: {
-    position: 'absolute',
-    left: 10,
   },
 });
 
