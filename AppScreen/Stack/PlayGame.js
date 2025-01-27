@@ -17,6 +17,7 @@ const TARGET_SIZE = 40;
 const ARROW_SIZE = 30;
 const GAME_DURATION = 60;
 const MAX_PULL = 150;
+const HIT_THRESHOLD = TARGET_SIZE / 2; // Distance threshold for hit detection
 
 const PlayGame = () => {
   const [score, setScore] = useState(0);
@@ -42,8 +43,8 @@ const PlayGame = () => {
     for (let i = 0; i < 3; i++) {
       newTargets.push({
         id: i,
-        x: Math.random() * (SCREEN_WIDTH - TARGET_SIZE),
-        y: 100 + Math.random() * (SCREEN_HEIGHT / 3),
+        x: 50 + Math.random() * (SCREEN_WIDTH - TARGET_SIZE - 100),
+        y: 100 + Math.random() * (SCREEN_HEIGHT / 2.5),
       });
     }
     setTargets(newTargets);
@@ -54,7 +55,7 @@ const PlayGame = () => {
 
     setIsArrowFlying(true);
     
-    const power = 300; // Fixed power for now
+    const power = 500;
     const targetX = Math.cos(aimAngle) * power;
     const targetY = Math.sin(aimAngle) * power;
 
@@ -63,11 +64,37 @@ const PlayGame = () => {
       duration: 1000,
       useNativeDriver: true,
     }).start(() => {
+      const finalX = SCREEN_WIDTH / 2 + targetX;
+      const finalY = SCREEN_HEIGHT - 150 + targetY;
+      checkHits(finalX, finalY);
+      
       setTimeout(() => {
         setIsArrowFlying(false);
         arrowAnimation.setValue({ x: 0, y: 0 });
       }, 100);
     });
+  };
+
+  const checkHits = (arrowX, arrowY) => {
+    let hitTarget = false;
+    
+    targets.forEach((target) => {
+      const distance = Math.sqrt(
+        Math.pow(arrowX - (target.x + TARGET_SIZE / 2), 2) +
+        Math.pow(arrowY - (target.y + TARGET_SIZE / 2), 2)
+      );
+
+      if (distance < HIT_THRESHOLD) {
+        hitTarget = true;
+        setScore(prev => prev + 100);
+        setTargets(prev => prev.filter(t => t.id !== target.id));
+      }
+    });
+
+    // Generate new targets if all are hit or none remain
+    if (targets.length <= 1 || hitTarget) {
+      generateTargets();
+    }
   };
 
   const panResponder = useRef(
@@ -82,7 +109,8 @@ const PlayGame = () => {
 
         const dx = gesture.dx;
         const dy = gesture.dy;
-        const angle = Math.atan2(dy, dx);
+        // Invert angle calculation for more intuitive aiming
+        const angle = Math.atan2(-dy, -dx);
         setAimAngle(angle);
       },
       onPanResponderRelease: () => {
@@ -99,11 +127,19 @@ const PlayGame = () => {
       </View>
 
       <View style={styles.gameArea} {...panResponder.panHandlers}>
+        {/* Targets with visual center point */}
         {targets.map((target) => (
-          <View
-            key={target.id}
-            style={[styles.target, { left: target.x, top: target.y }]}
-          />
+          <View key={target.id}>
+            <View
+              style={[styles.target, { left: target.x, top: target.y }]}
+            />
+            <View
+              style={[
+                styles.targetCenter,
+                { left: target.x + TARGET_SIZE / 2, top: target.y + TARGET_SIZE / 2 },
+              ]}
+            />
+          </View>
         ))}
 
         <View style={[styles.archer, { left: SCREEN_WIDTH / 2 - ARCHER_SIZE / 2 }]}>
@@ -132,17 +168,22 @@ const PlayGame = () => {
           )}
         </View>
 
-        {/* Shoot Button */}
         <TouchableOpacity
-          style={styles.shootButton}
+          style={[
+            styles.shootButton,
+            isArrowFlying && styles.shootButtonDisabled,
+          ]}
           onPress={shootArrow}
           disabled={isArrowFlying}>
-          <Text style={styles.shootButtonText}>SHOOT</Text>
+          <Text style={styles.shootButtonText}>
+            {isArrowFlying ? 'FIRING...' : 'SHOOT'}
+          </Text>
         </TouchableOpacity>
 
         <View style={styles.debugInfo}>
           <Text>Angle: {Math.round(aimAngle * 180 / Math.PI)}°</Text>
           <Text>Flying: {isArrowFlying ? 'Yes' : 'No'}</Text>
+          <Text>Score: {score}</Text>
         </View>
       </View>
     </View>
@@ -222,6 +263,16 @@ const styles = StyleSheet.create({
     left: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
     padding: 10,
+  },
+  targetCenter: {
+    position: 'absolute',
+    width: 4,
+    height: 4,
+    backgroundColor: '#FF0000',
+    borderRadius: 2,
+  },
+  shootButtonDisabled: {
+    backgroundColor: '#888888',
   },
 });
 
