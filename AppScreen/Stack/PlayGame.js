@@ -357,9 +357,10 @@ const styles = StyleSheet.create({
   arrow: {
     position: 'absolute',
     width: ARROW_SIZE * 2,
-    height: ARROW_SIZE,
-    top: ARCHER_SIZE / 2 - ARROW_SIZE / 2,
-    left: ARCHER_SIZE / 2,
+    // height: ARROW_SIZE,
+    // top: ARCHER_SIZE / 2 - ARROW_SIZE / 2,
+    // left: ARCHER_SIZE / 2,
+    height: 100,
   },
   aimLine: {
     position: 'absolute',
