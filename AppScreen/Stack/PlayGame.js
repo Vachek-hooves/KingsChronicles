@@ -45,9 +45,59 @@ const PlayGame = () => {
         id: i,
         x: 50 + Math.random() * (SCREEN_WIDTH - TARGET_SIZE - 100),
         y: 100 + Math.random() * (SCREEN_HEIGHT / 2.5),
+        isHit: false,
       });
     }
     setTargets(newTargets);
+  };
+
+  const checkHits = (arrowX, arrowY) => {
+    let hitSomething = false;
+    
+    setTargets(currentTargets => 
+      currentTargets.map(target => {
+        // Calculate distance from arrow to target center
+        const targetCenterX = target.x + TARGET_SIZE / 2;
+        const targetCenterY = target.y + TARGET_SIZE / 2;
+        
+        const distance = Math.sqrt(
+          Math.pow(arrowX - targetCenterX, 2) +
+          Math.pow(arrowY - targetCenterY, 2)
+        );
+
+        // Check if this target was hit and wasn't already hit before
+        if (distance < TARGET_SIZE && !target.isHit) {
+          hitSomething = true;
+          setScore(prev => prev + 100);
+          console.log('Target hit!', {distance, targetId: target.id}); // Debug log
+          return { ...target, isHit: true };
+        }
+        return target;
+      })
+    );
+
+    // If we hit something, check if all targets are hit
+    if (hitSomething) {
+      setTimeout(() => {
+        setTargets(currentTargets => {
+          const allHit = currentTargets.every(t => t.isHit);
+          if (allHit) {
+            // Generate new targets if all are hit
+            const newTargets = [];
+            for (let i = 0; i < 3; i++) {
+              newTargets.push({
+                id: i,
+                x: 50 + Math.random() * (SCREEN_WIDTH - TARGET_SIZE - 100),
+                y: 100 + Math.random() * (SCREEN_HEIGHT / 2.5),
+                isHit: false,
+              });
+            }
+            return newTargets;
+          }
+          return currentTargets;
+        });
+      }, 500);
+    }
   };
 
   const shootArrow = () => {
@@ -64,8 +114,11 @@ const PlayGame = () => {
       duration: 1000,
       useNativeDriver: true,
     }).start(() => {
+      // Calculate final position for hit detection
       const finalX = SCREEN_WIDTH / 2 + targetX;
       const finalY = SCREEN_HEIGHT - 150 + targetY;
+      
+      // Check for hits immediately after arrow reaches its destination
       checkHits(finalX, finalY);
       
       setTimeout(() => {
@@ -73,28 +126,6 @@ const PlayGame = () => {
         arrowAnimation.setValue({ x: 0, y: 0 });
       }, 100);
     });
-  };
-
-  const checkHits = (arrowX, arrowY) => {
-    let hitTarget = false;
-    
-    targets.forEach((target) => {
-      const distance = Math.sqrt(
-        Math.pow(arrowX - (target.x + TARGET_SIZE / 2), 2) +
-        Math.pow(arrowY - (target.y + TARGET_SIZE / 2), 2)
-      );
-
-      if (distance < HIT_THRESHOLD) {
-        hitTarget = true;
-        setScore(prev => prev + 100);
-        setTargets(prev => prev.filter(t => t.id !== target.id));
-      }
-    });
-
-    // Generate new targets if all are hit or none remain
-    if (targets.length <= 1 || hitTarget) {
-      generateTargets();
-    }
   };
 
   const panResponder = useRef(
@@ -160,19 +191,25 @@ const PlayGame = () => {
       </View>
 
       <View style={styles.gameArea} {...panResponder.panHandlers}>
-        {/* Targets with visual center point */}
         {targets.map((target) => (
-          <View key={target.id}>
-            <View
-              style={[styles.target, { left: target.x, top: target.y }]}
-            />
+          <Animated.View 
+            key={target.id}
+            style={[
+              styles.target,
+              { left: target.x, top: target.y },
+              target.isHit && styles.targetHit,
+              // Add animation for hit effect
+              target.isHit && {
+                transform: [{ scale: 0.9 }],
+              }
+            ]}>
             <View
               style={[
                 styles.targetCenter,
-                { left: target.x + TARGET_SIZE / 2, top: target.y + TARGET_SIZE / 2 },
+                target.isHit && styles.targetCenterHit,
               ]}
             />
-          </View>
+          </Animated.View>
         ))}
 
         <View style={[styles.archer, { left: SCREEN_WIDTH / 2 - ARCHER_SIZE / 2 }]}>
@@ -243,6 +280,8 @@ const styles = StyleSheet.create({
     height: TARGET_SIZE,
     borderRadius: TARGET_SIZE / 2,
     backgroundColor: '#C6A44E',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   archer: {
     position: 'absolute',
@@ -305,12 +344,19 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
     padding: 10,
   },
+  targetHit: {
+    backgroundColor: '#171717',
+    borderWidth: 2,
+    borderColor: '#C6A44E',
+  },
   targetCenter: {
-    position: 'absolute',
     width: 4,
     height: 4,
     backgroundColor: '#FF0000',
     borderRadius: 2,
+  },
+  targetCenterHit: {
+    backgroundColor: '#FFF',
   },
   shootButtonDisabled: {
     backgroundColor: '#888888',
