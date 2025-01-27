@@ -18,7 +18,7 @@ const ARROW_SIZE = 30;
 const GAME_DURATION = 60;
 const MAX_PULL = 150;
 const HIT_THRESHOLD = TARGET_SIZE; // Made even more forgiving
-const MAX_POWER = 500;
+const MAX_POWER = 700;
 const MIN_POWER = 200;
 
 const PlayGame = () => {
