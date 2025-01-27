@@ -17,7 +17,9 @@ const TARGET_SIZE = 40;
 const ARROW_SIZE = 30;
 const GAME_DURATION = 60;
 const MAX_PULL = 150;
-const HIT_THRESHOLD = TARGET_SIZE / 2; // Distance threshold for hit detection
+const HIT_THRESHOLD = TARGET_SIZE; // Made even more forgiving
+const MAX_POWER = 500;
+const MIN_POWER = 200;
 
 const PlayGame = () => {
   const [score, setScore] = useState(0);
@@ -27,6 +29,9 @@ const PlayGame = () => {
   const [aimAngle, setAimAngle] = useState(0);
   const [pullDistance, setPullDistance] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [debugPoint, setDebugPoint] = useState(null); // Add debug point state
+  const [power, setPower] = useState(MAX_POWER);
+  const [arrowPath, setArrowPath] = useState([]); // Track arrow path
 
   const arrowAnimation = useRef(new Animated.ValueXY()).current;
 
@@ -51,48 +56,54 @@ const PlayGame = () => {
     setTargets(newTargets);
   };
 
+  const updatePower = (gesture) => {
+    // Convert vertical drag to power
+    const newPower = MAX_POWER - Math.max(0, Math.min(gesture.dy, MAX_POWER - MIN_POWER));
+    setPower(newPower);
+  };
+
   const checkHits = (arrowX, arrowY) => {
+    setDebugPoint({ x: arrowX, y: arrowY });
+    
     let hitSomething = false;
     
-    setTargets(currentTargets => 
-      currentTargets.map(target => {
-        // Calculate distance from arrow to target center
+    setTargets(currentTargets => {
+      const newTargets = currentTargets.map(target => {
+        // Check if arrow passes through target
         const targetCenterX = target.x + TARGET_SIZE / 2;
         const targetCenterY = target.y + TARGET_SIZE / 2;
         
+        // Calculate distance from arrow to target center
         const distance = Math.sqrt(
           Math.pow(arrowX - targetCenterX, 2) +
           Math.pow(arrowY - targetCenterY, 2)
         );
 
-        // Check if this target was hit and wasn't already hit before
-        if (distance < TARGET_SIZE && !target.isHit) {
+        if (distance < HIT_THRESHOLD && !target.isHit) {
           hitSomething = true;
-          setScore(prev => prev + 100);
-          console.log('Target hit!', {distance, targetId: target.id}); // Debug log
           return { ...target, isHit: true };
         }
         return target;
-      })
-    );
+      });
 
-    // If we hit something, check if all targets are hit
+      if (hitSomething) {
+        setScore(prev => prev + 100);
+      }
+
+      return newTargets;
+    });
+
+    // Generate new targets if all are hit
     if (hitSomething) {
       setTimeout(() => {
         setTargets(currentTargets => {
-          const allHit = currentTargets.every(t => t.isHit);
-          if (allHit) {
-            // Generate new targets if all are hit
-            const newTargets = [];
-            for (let i = 0; i < 3; i++) {
-              newTargets.push({
-                id: i,
-                x: 50 + Math.random() * (SCREEN_WIDTH - TARGET_SIZE - 100),
-                y: 100 + Math.random() * (SCREEN_HEIGHT / 2.5),
-                isHit: false,
-              });
-            }
-            return newTargets;
+          if (currentTargets.every(t => t.isHit)) {
+            return Array.from({ length: 3 }, (_, i) => ({
+              id: i,
+              x: 50 + Math.random() * (SCREEN_WIDTH - TARGET_SIZE - 100),
+              y: 100 + Math.random() * (SCREEN_HEIGHT / 2.5),
+              isHit: false,
+            }));
           }
           return currentTargets;
         });
@@ -104,21 +115,22 @@ const PlayGame = () => {
     if (isArrowFlying) return;
 
     setIsArrowFlying(true);
+    setDebugPoint(null);
     
-    const power = 500;
     const targetX = Math.cos(aimAngle) * power;
     const targetY = Math.sin(aimAngle) * power;
+
+    const startX = SCREEN_WIDTH / 2;
+    const startY = SCREEN_HEIGHT - 150;
 
     Animated.timing(arrowAnimation, {
       toValue: { x: targetX, y: targetY },
       duration: 1000,
       useNativeDriver: true,
     }).start(() => {
-      // Calculate final position for hit detection
-      const finalX = SCREEN_WIDTH / 2 + targetX;
-      const finalY = SCREEN_HEIGHT - 150 + targetY;
+      const finalX = startX + targetX;
+      const finalY = startY + targetY;
       
-      // Check for hits immediately after arrow reaches its destination
       checkHits(finalX, finalY);
       
       setTimeout(() => {
@@ -134,15 +146,18 @@ const PlayGame = () => {
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: () => {
         setIsDragging(true);
+        setPower(MAX_POWER);
       },
       onPanResponderMove: (_, gesture) => {
         if (isArrowFlying) return;
 
         const dx = gesture.dx;
         const dy = gesture.dy;
-        // Invert angle calculation for more intuitive aiming
         const angle = Math.atan2(-dy, -dx);
         setAimAngle(angle);
+        
+        // Update power based on drag distance
+        updatePower(gesture);
       },
       onPanResponderRelease: () => {
         setIsDragging(false);
@@ -191,26 +206,51 @@ const PlayGame = () => {
       </View>
 
       <View style={styles.gameArea} {...panResponder.panHandlers}>
-        {targets.map((target) => (
-          <Animated.View 
-            key={target.id}
+        {/* Power Meter */}
+        <View style={styles.powerMeter}>
+          <View 
             style={[
-              styles.target,
-              { left: target.x, top: target.y },
-              target.isHit && styles.targetHit,
-              // Add animation for hit effect
-              target.isHit && {
-                transform: [{ scale: 0.9 }],
+              styles.powerLevel, 
+              { 
+                height: `${(power / MAX_POWER) * 100}%`,
+                backgroundColor: power > MAX_POWER * 0.7 ? '#FF4444' : 
+                               power > MAX_POWER * 0.4 ? '#FFB344' : '#44FF44'
               }
-            ]}>
+            ]} 
+          />
+        </View>
+
+        {targets.map((target) => (
+          <View key={target.id}>
+            <View
+              style={[
+                styles.target,
+                { left: target.x, top: target.y },
+                target.isHit && styles.targetHit,
+              ]}
+            />
             <View
               style={[
                 styles.targetCenter,
+                { left: target.x + TARGET_SIZE / 2, top: target.y + TARGET_SIZE / 2 },
                 target.isHit && styles.targetCenterHit,
               ]}
             />
-          </Animated.View>
+          </View>
         ))}
+
+        {/* Debug point to show where arrow lands */}
+        {debugPoint && (
+          <View
+            style={[
+              styles.debugPoint,
+              {
+                left: debugPoint.x,
+                top: debugPoint.y,
+              },
+            ]}
+          />
+        )}
 
         <View style={[styles.archer, { left: SCREEN_WIDTH / 2 - ARCHER_SIZE / 2 }]}>
           <Animated.View
@@ -280,8 +320,8 @@ const styles = StyleSheet.create({
     height: TARGET_SIZE,
     borderRadius: TARGET_SIZE / 2,
     backgroundColor: '#C6A44E',
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'transparent',
   },
   archer: {
     position: 'absolute',
@@ -346,8 +386,8 @@ const styles = StyleSheet.create({
   },
   targetHit: {
     backgroundColor: '#171717',
-    borderWidth: 2,
     borderColor: '#C6A44E',
+    transform: [{ scale: 0.9 }],
   },
   targetCenter: {
     width: 4,
@@ -360,6 +400,38 @@ const styles = StyleSheet.create({
   },
   shootButtonDisabled: {
     backgroundColor: '#888888',
+  },
+  debugPoint: {
+    position: 'absolute',
+    width: 10,
+    height: 10,
+    backgroundColor: 'red',
+    borderRadius: 5,
+    zIndex: 999,
+  },
+  powerMeter: {
+    position: 'absolute',
+    left: 20,
+    bottom: 100,
+    width: 20,
+    height: 200,
+    backgroundColor: '#E5E5E5',
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  powerLevel: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    backgroundColor: '#44FF44',
+    borderRadius: 10,
+  },
+  powerIndicator: {
+    position: 'absolute',
+    left: -10,
+    width: 40,
+    height: 4,
+    backgroundColor: '#171717',
   },
 });
 
