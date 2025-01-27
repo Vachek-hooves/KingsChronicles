@@ -275,7 +275,8 @@ const PlayGame = () => {
         )}
 
         <View style={[styles.archer, { left: SCREEN_WIDTH / 2 - ARCHER_SIZE / 2 }]}>
-          <Animated.View
+          <Animated.Image
+            source={require('../../assets/image/arrowgame/arrow.png')}
             style={[
               styles.arrow,
               {
@@ -286,6 +287,7 @@ const PlayGame = () => {
                 ],
               },
             ]}
+            resizeMode="contain"
           />
           {renderAimLine()}
         </View>
@@ -354,10 +356,9 @@ const styles = StyleSheet.create({
   },
   arrow: {
     position: 'absolute',
-    width: ARROW_SIZE,
-    height: 2,
-    backgroundColor: '#171717',
-    top: ARCHER_SIZE / 2,
+    width: ARROW_SIZE * 2,
+    height: ARROW_SIZE,
+    top: ARCHER_SIZE / 2 - ARROW_SIZE / 2,
     left: ARCHER_SIZE / 2,
   },
   aimLine: {
@@ -428,7 +429,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 10,
     height: 10,
-    backgroundColor: 'red',
+    backgroundColor:  '#FF0000',
     borderRadius: 5,
     zIndex: 999,
   },
