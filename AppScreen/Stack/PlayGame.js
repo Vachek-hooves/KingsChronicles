@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Text,
   Animated,
+  PanResponder,
 } from 'react-native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -15,6 +16,7 @@ const ARCHER_SIZE = 60;
 const TARGET_SIZE = 40;
 const ARROW_SIZE = 30;
 const GAME_DURATION = 60; // 60 seconds
+const MAX_PULL = 100; // Maximum pull distance
 
 const PlayGame = ({navigation}) => {
   const [score, setScore] = useState(0);
@@ -27,8 +29,42 @@ const PlayGame = ({navigation}) => {
   });
   const [isArrowFlying, setIsArrowFlying] = useState(false);
   const [arrowTrajectory, setArrowTrajectory] = useState(null);
+  const [aimAngle, setAimAngle] = useState(0);
+  const [pullDistance, setPullDistance] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
   
   const arrowAnimation = useRef(new Animated.ValueXY()).current;
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => {
+        setIsDragging(true);
+      },
+      onPanResponderMove: (_, gesture) => {
+        if (isArrowFlying) return;
+
+        // Calculate angle and pull distance from touch position
+        const touchX = gesture.dx;
+        const touchY = gesture.dy;
+        const distance = Math.min(
+          Math.sqrt(touchX * touchX + touchY * touchY),
+          MAX_PULL
+        );
+        const angle = Math.atan2(touchY, touchX);
+
+        setAimAngle(angle);
+        setPullDistance(distance);
+      },
+      onPanResponderRelease: () => {
+        if (isArrowFlying) return;
+        shootArrow(aimAngle, pullDistance);
+        setIsDragging(false);
+        setPullDistance(0);
+      },
+    })
+  ).current;
 
   useEffect(() => {
     generateTargets();
@@ -65,11 +101,11 @@ const PlayGame = ({navigation}) => {
     // Handle game over logic
   };
 
-  const shootArrow = (angle) => {
+  const shootArrow = (angle, power) => {
     if (isArrowFlying) return;
 
     setIsArrowFlying(true);
-    const trajectory = calculateTrajectory(angle);
+    const trajectory = calculateTrajectory(angle, power);
     setArrowTrajectory(trajectory);
 
     Animated.timing(arrowAnimation, {
@@ -82,10 +118,11 @@ const PlayGame = ({navigation}) => {
     });
   };
 
-  const calculateTrajectory = (angle) => {
-    const power = 300; // Adjust for arrow speed
-    const targetX = Math.sin(angle) * power;
-    const targetY = -Math.cos(angle) * power;
+  const calculateTrajectory = (angle, power) => {
+    const normalizedPower = power / MAX_PULL; // 0 to 1
+    const maxDistance = 300; // Maximum shooting distance
+    const targetX = Math.cos(angle) * (maxDistance * normalizedPower);
+    const targetY = Math.sin(angle) * (maxDistance * normalizedPower);
     return { targetX, targetY };
   };
 
@@ -113,6 +150,34 @@ const PlayGame = ({navigation}) => {
     arrowAnimation.setValue({ x: 0, y: 0 });
   };
 
+  // Render trajectory guide
+  const renderTrajectoryGuide = () => {
+    if (!isDragging || isArrowFlying) return null;
+
+    const guidePoints = [];
+    const steps = 10;
+    const trajectory = calculateTrajectory(aimAngle, pullDistance);
+
+    for (let i = 0; i <= steps; i++) {
+      const progress = i / steps;
+      guidePoints.push(
+        <View
+          key={i}
+          style={[
+            styles.trajectoryDot,
+            {
+              left: arrowPosition.x + trajectory.targetX * progress,
+              top: arrowPosition.y + trajectory.targetY * progress,
+              opacity: 1 - progress,
+            },
+          ]}
+        />
+      );
+    }
+
+    return guidePoints;
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -122,21 +187,20 @@ const PlayGame = ({navigation}) => {
       </View>
 
       {/* Game Area */}
-      <View style={styles.gameArea}>
+      <View style={styles.gameArea} {...panResponder.panHandlers}>
+        {/* Trajectory Guide */}
+        {renderTrajectoryGuide()}
+
         {/* Targets */}
         {targets.map((target) => (
           <View
             key={target.id}
-            style={[
-              styles.target,
-              { left: target.x, top: target.y },
-            ]}
+            style={[styles.target, { left: target.x, top: target.y }]}
           />
         ))}
 
-        {/* Archer */}
+        {/* Archer and Arrow */}
         <View style={[styles.archer, { left: arrowPosition.x - ARCHER_SIZE / 2 }]}>
-          {/* Arrow */}
           <Animated.View
             style={[
               styles.arrow,
@@ -144,18 +208,29 @@ const PlayGame = ({navigation}) => {
                 transform: [
                   { translateX: arrowAnimation.x },
                   { translateY: arrowAnimation.y },
-                  { rotate: arrowTrajectory ? `${Math.atan2(arrowTrajectory.targetY, arrowTrajectory.targetX)}rad` : '0deg' },
+                  { rotate: `${aimAngle}rad` },
                 ],
               },
             ]}
           />
+          {isDragging && (
+            <View
+              style={[
+                styles.aimLine,
+                {
+                  width: pullDistance,
+                  transform: [{ rotate: `${aimAngle}rad` }],
+                },
+              ]}
+            />
+          )}
         </View>
       </View>
 
       {/* Game Controls */}
       <TouchableOpacity
         style={styles.shootButton}
-        onPress={() => shootArrow(Math.PI / 4)} // 45 degrees angle
+        onPress={() => shootArrow(Math.PI / 4, MAX_PULL)} // 45 degrees angle
       >
         <Text style={styles.shootButtonText}>SHOOT</Text>
       </TouchableOpacity>
@@ -208,6 +283,8 @@ const styles = StyleSheet.create({
     height: 2,
     backgroundColor: '#171717',
     top: ARCHER_SIZE / 2,
+    left: ARCHER_SIZE / 2,
+    transformOrigin: 'left',
   },
   shootButton: {
     position: 'absolute',
@@ -222,6 +299,21 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  trajectoryDot: {
+    position: 'absolute',
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'rgba(198, 164, 78, 0.5)',
+  },
+  aimLine: {
+    position: 'absolute',
+    height: 2,
+    backgroundColor: '#C6A44E',
+    top: ARCHER_SIZE / 2,
+    left: ARCHER_SIZE / 2,
+    transformOrigin: 'left',
   },
 });
 
