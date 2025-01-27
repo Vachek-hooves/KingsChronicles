@@ -21,13 +21,17 @@ const BattleList = ({navigation}) => {
   const [selectedBattle, setSelectedBattle] = useState(null);
 
   const handleBattleSelect = battle => {
+    // console.log(battle);
+    // navigation.navigate('BattleScreen', {battle: battle});
     setSelectedBattle(battle);
   };
 
   const handleKingsBattle = () => {
     if (selectedBattle) {
+      console.log(selectedBattle);
       console.log(`Navigating to battle: ${selectedBattle.title}`);
       // navigation.navigate('BattleDetails', { battle: selectedBattle });
+      navigation.navigate('BattleScreen', {battle: selectedBattle});
     }
   };
 
