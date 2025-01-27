@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import React, {useState} from 'react';
 import {BATTLE_DATA} from '../../data/BattleData';
+import MainLayout from '../../components/Layout/MainLayout';
 
 const BattleScreen = ({route}) => {
   const {battle} = route.params;
@@ -32,86 +33,98 @@ const BattleScreen = ({route}) => {
   if (!battleDetails) return null;
 
   const currentDescription = battleDetails.description[currentIndex];
+  const isTextAbove = currentIndex % 2 === 0; // Alternates text position
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Timeline */}
-      <View style={styles.timelineContainer}>
-        <View style={styles.timeline}>
-          <View style={styles.timelineLine} />
-          <View style={[styles.timelineDot, {left: '25%'}]} />
-          <Image
-            source={require('../../assets/image/ui/hourglass.png')}
-            style={styles.hourglassIcon}
-          />
-          <View style={[styles.timelineDot, {right: '25%'}]} />
-        </View>
-      </View>
+    <MainLayout>
+      <SafeAreaView style={styles.container}>
+        {/* Timeline */}
 
-      {/* Battle Image */}
-      <View style={styles.imageContainer}>
-        <Image
-          source={currentDescription.image}
-          style={styles.battleImage}
-          resizeMode="cover"
-        />
-        
-        {/* Navigation Arrows */}
-        <View style={styles.navigationContainer}>
-          <TouchableOpacity
-            onPress={handlePrevious}
-            disabled={currentIndex === 0}
-            style={[
-              styles.navButton,
-              currentIndex === 0 && styles.navButtonDisabled,
-            ]}>
+        {/* Content Container */}
+        <View style={styles.contentContainer}>
+          {/* Text Above */}
+          {isTextAbove && (
+            <View style={styles.descriptionContainer}>
+              <Text style={styles.descriptionText}>
+                {currentDescription.text}
+              </Text>
+            </View>
+          )}
+
+          {/* Battle Image */}
+          <View style={styles.imageContainer}>
             <Image
-              source={require('../../assets/image/icons/arrowLeft.png')}
-              style={styles.navIcon}
+              source={currentDescription.image}
+              style={styles.battleImage}
+              resizeMode="cover"
             />
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            onPress={handleNext}
-            disabled={currentIndex === battleDetails.description.length - 1}
-            style={[
-              styles.navButton,
-              currentIndex === battleDetails.description.length - 1 &&
-                styles.navButtonDisabled,
-            ]}>
-            <Image
-              source={require('../../assets/image/icons/arrowLeft.png')}
-              style={[styles.navIcon,{transform:[{rotate:'180deg'}]}]}
-            />
-          </TouchableOpacity>
+
+            {/* Navigation Arrows */}
+            <View style={styles.navigationContainer}>
+              <TouchableOpacity
+                onPress={handlePrevious}
+                disabled={currentIndex === 0}
+                style={[
+                  styles.navButton,
+                  currentIndex === 0 && styles.navButtonDisabled,
+                ]}>
+                <Image
+                  source={require('../../assets/image/icons/arrowLeft.png')}
+                  style={styles.navIcon}
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleNext}
+                disabled={currentIndex === battleDetails.description.length - 1}
+                style={[
+                  styles.navButton,
+                  currentIndex === battleDetails.description.length - 1 &&
+                    styles.navButtonDisabled,
+                ]}>
+                <Image
+                  source={require('../../assets/image/icons/arrowLeft.png')}
+                  style={[styles.navIcon, {transform: [{rotate: '180deg'}]}]}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Text Below */}
+          {!isTextAbove && (
+            <View style={styles.descriptionContainer}>
+              <Text style={styles.descriptionText}>
+                {currentDescription.text}
+              </Text>
+            </View>
+          )}
         </View>
-      </View>
 
-      {/* Battle Description */}
-      <View style={styles.descriptionContainer}>
-        <Text style={styles.descriptionText}>{currentDescription.text}</Text>
-      </View>
-
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        {battleDetails.description.map((_, index) => (
-          <View
-            key={index}
-            style={[
-              styles.navDot,
-              currentIndex === index && styles.navDotActive,
-            ]}
-          />
-        ))}
-      </View>
-    </SafeAreaView>
+        {/* Bottom Navigation */}
+        <View style={styles.bottomNav}>
+          {battleDetails.description.map((_, index) => (
+            <View
+              key={index}
+              style={[
+                styles.navDot,
+                currentIndex === index && styles.navDotActive,
+              ]}
+            />
+          ))}
+        </View>
+      </SafeAreaView>
+    </MainLayout>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF',
+    // backgroundColor: '#FFF',
+  },
+  contentContainer: {
+    flex: 1,
+    justifyContent: 'center',
   },
   timelineContainer: {
     paddingHorizontal: 20,
@@ -144,48 +157,51 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: '100%',
-    height: Dimensions.get('window').height * 0.5,
-    marginTop: 20,
+    height: Dimensions.get('window').height * 0.6,
+    marginVertical: 20,
     position: 'relative',
+    paddingHorizontal: 20,
   },
   battleImage: {
     width: '100%',
     height: '100%',
+    borderRadius: 20,
   },
   navigationContainer: {
     position: 'absolute',
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
-    paddingHorizontal: 20,
-    top: '50%',
-    transform: [{translateY: -20}],
+    paddingHorizontal: 40,
+    bottom: '10%',
+    transform: [{translateY: 0}],
   },
   navButton: {
-    width: 40,
-    height: 40,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    // width: 40,
+    // height: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 8,
   },
   navButtonDisabled: {
-    opacity: 0.5,
+    opacity: 0.3,
   },
   navIcon: {
-    width: 24,
-    height: 24,
-    tintColor: '#FFF',
+    width: 46,
+    height: 36,
+    tintColor: '#D7B154',
   },
   descriptionContainer: {
     padding: 20,
-    flex: 1,
   },
   descriptionText: {
     fontSize: 16,
     lineHeight: 24,
     color: '#171717',
     textTransform: 'uppercase',
+    textAlign: 'center',
   },
   bottomNav: {
     flexDirection: 'row',
