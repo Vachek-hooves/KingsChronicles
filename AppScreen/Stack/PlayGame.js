@@ -165,11 +165,13 @@ const PlayGame = () => {
     })
   ).current;
 
-  const renderAimLine = () => {
+  const renderDirectionControl = () => {
     if (!isDragging) return null;
 
     return (
-      <>
+      <View style={styles.directionControl}>
+        {/* Base point for direction */}
+        <View style={styles.directionBase} />
         {/* Direction line */}
         <View
           style={[
@@ -180,7 +182,7 @@ const PlayGame = () => {
             },
           ]}
         />
-        {/* Arrow indicator at the end of line */}
+        {/* Arrow indicator */}
         <View
           style={[
             styles.aimArrowIndicator,
@@ -194,7 +196,7 @@ const PlayGame = () => {
           ]}>
           <View style={styles.aimArrowHead} />
         </View>
-      </>
+      </View>
     );
   };
 
@@ -206,7 +208,7 @@ const PlayGame = () => {
       </View>
 
       <View style={styles.gameArea} {...panResponder.panHandlers}>
-        {/* Power Meter */}
+        {/* Power meter on left */}
         <View style={styles.powerMeter}>
           <View 
             style={[
@@ -220,6 +222,10 @@ const PlayGame = () => {
           />
         </View>
 
+        {/* Direction control on right */}
+        {renderDirectionControl()}
+
+        {/* Targets */}
         {targets.map((target) => (
           <View key={target.id}>
             <View
@@ -239,19 +245,7 @@ const PlayGame = () => {
           </View>
         ))}
 
-        {/* Debug point to show where arrow lands */}
-        {debugPoint && (
-          <View
-            style={[
-              styles.debugPoint,
-              {
-                left: debugPoint.x,
-                top: debugPoint.y,
-              },
-            ]}
-          />
-        )}
-
+        {/* Archer and arrow */}
         <View style={[styles.archer, { left: SCREEN_WIDTH / 2 - ARCHER_SIZE / 2 }]}>
           <Animated.View
             style={[
@@ -265,8 +259,20 @@ const PlayGame = () => {
               },
             ]}
           />
-          {renderAimLine()}
         </View>
+
+        {/* Debug point to show where arrow lands */}
+        {debugPoint && (
+          <View
+            style={[
+              styles.debugPoint,
+              {
+                left: debugPoint.x,
+                top: debugPoint.y,
+              },
+            ]}
+          />
+        )}
 
         <TouchableOpacity
           style={[
@@ -338,34 +344,10 @@ const styles = StyleSheet.create({
     top: ARCHER_SIZE / 2,
     left: ARCHER_SIZE / 2,
   },
-  aimLine: {
-    position: 'absolute',
-    height: 2,
-    backgroundColor: '#C6A44E',
-    top: ARCHER_SIZE / 2,
-    left: ARCHER_SIZE / 2,
-  },
-  aimArrowIndicator: {
-    position: 'absolute',
-    top: ARCHER_SIZE / 2 - 5,
-    left: ARCHER_SIZE / 2,
-  },
-  aimArrowHead: {
-    width: 0,
-    height: 0,
-    backgroundColor: 'transparent',
-    borderStyle: 'solid',
-    borderLeftWidth: 5,
-    borderRightWidth: 5,
-    borderBottomWidth: 10,
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    borderBottomColor: '#C6A44E',
-    transform: [{ rotate: '90deg' }],
-  },
   shootButton: {
     position: 'absolute',
     bottom: 20,
+    // alignSelf: 'center',
     alignSelf: 'center',
     backgroundColor: '#C6A44E',
     paddingVertical: 15,
@@ -432,6 +414,47 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     backgroundColor: '#171717',
+  },
+  directionControl: {
+    position: 'absolute',
+    right: 40,
+    bottom: 100,
+    width: 120,
+    height: 120,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  directionBase: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#C6A44E',
+    borderWidth: 2,
+    borderColor: '#171717',
+  },
+  aimLine: {
+    position: 'absolute',
+    height: 2,
+    backgroundColor: '#C6A44E',
+    left: 10, // Half of directionBase width
+    transformOrigin: 'left',
+  },
+  aimArrowHead: {
+    width: 0,
+    height: 0,
+    backgroundColor: 'transparent',
+    borderStyle: 'solid',
+    borderLeftWidth: 5,
+    borderRightWidth: 5,
+    borderBottomWidth: 10,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: '#C6A44E',
+    transform: [{ rotate: '90deg' }],
+  },
+  aimArrowIndicator: {
+    position: 'absolute',
+    left: 10,
   },
 });
 
