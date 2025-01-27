@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View,TouchableOpacity } from 'react-native'
 import MainLayout from '../../components/Layout/MainLayout'
 
-const Game = () => {
+const Game = ({navigation}) => {
   return (
     <MainLayout>
       <TouchableOpacity onPress={() => navigation.navigate('PlayGame')}>
