@@ -4,9 +4,9 @@ import {
   View,
   Dimensions,
   Image,
-  TouchableOpacity,
   Text,
   Animated,
+  TouchableOpacity,
   PanResponder,
 } from 'react-native';
 
@@ -15,25 +15,60 @@ const SCREEN_HEIGHT = Dimensions.get('window').height;
 const ARCHER_SIZE = 60;
 const TARGET_SIZE = 40;
 const ARROW_SIZE = 30;
-const GAME_DURATION = 60; // 60 seconds
-const MAX_PULL = 100; // Maximum pull distance
+const GAME_DURATION = 60;
+const MAX_PULL = 150;
 
-const PlayGame = ({navigation}) => {
+const PlayGame = () => {
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
-  const [isGameActive, setIsGameActive] = useState(true);
   const [targets, setTargets] = useState([]);
-  const [arrowPosition, setArrowPosition] = useState({
-    x: SCREEN_WIDTH / 2,
-    y: SCREEN_HEIGHT - 150,
-  });
   const [isArrowFlying, setIsArrowFlying] = useState(false);
-  const [arrowTrajectory, setArrowTrajectory] = useState(null);
   const [aimAngle, setAimAngle] = useState(0);
   const [pullDistance, setPullDistance] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  
+
   const arrowAnimation = useRef(new Animated.ValueXY()).current;
+
+  useEffect(() => {
+    generateTargets();
+    const timer = setInterval(() => {
+      setTimeLeft(prev => prev > 0 ? prev - 1 : 0);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const generateTargets = () => {
+    const newTargets = [];
+    for (let i = 0; i < 3; i++) {
+      newTargets.push({
+        id: i,
+        x: Math.random() * (SCREEN_WIDTH - TARGET_SIZE),
+        y: 100 + Math.random() * (SCREEN_HEIGHT / 3),
+      });
+    }
+    setTargets(newTargets);
+  };
+
+  const shootArrow = () => {
+    if (isArrowFlying) return;
+
+    setIsArrowFlying(true);
+    
+    const power = 300; // Fixed power for now
+    const targetX = Math.cos(aimAngle) * power;
+    const targetY = Math.sin(aimAngle) * power;
+
+    Animated.timing(arrowAnimation, {
+      toValue: { x: targetX, y: targetY },
+      duration: 1000,
+      useNativeDriver: true,
+    }).start(() => {
+      setTimeout(() => {
+        setIsArrowFlying(false);
+        arrowAnimation.setValue({ x: 0, y: 0 });
+      }, 100);
+    });
+  };
 
   const panResponder = useRef(
     PanResponder.create({
@@ -45,153 +80,25 @@ const PlayGame = ({navigation}) => {
       onPanResponderMove: (_, gesture) => {
         if (isArrowFlying) return;
 
-        // Calculate angle and pull distance from touch position
-        const touchX = gesture.dx;
-        const touchY = gesture.dy;
-        const distance = Math.min(
-          Math.sqrt(touchX * touchX + touchY * touchY),
-          MAX_PULL
-        );
-        const angle = Math.atan2(touchY, touchX);
-
+        const dx = gesture.dx;
+        const dy = gesture.dy;
+        const angle = Math.atan2(dy, dx);
         setAimAngle(angle);
-        setPullDistance(distance);
       },
       onPanResponderRelease: () => {
-        if (isArrowFlying) return;
-        shootArrow(aimAngle, pullDistance);
         setIsDragging(false);
-        setPullDistance(0);
       },
     })
   ).current;
 
-  useEffect(() => {
-    generateTargets();
-    startTimer();
-  }, []);
-
-  const generateTargets = () => {
-    const newTargets = [];
-    for (let i = 0; i < 3; i++) {
-      newTargets.push({
-        id: i,
-        x: Math.random() * (SCREEN_WIDTH - TARGET_SIZE),
-        y: Math.random() * (SCREEN_HEIGHT / 2),
-      });
-    }
-    setTargets(newTargets);
-  };
-
-  const startTimer = () => {
-    const timer = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        if (prevTime <= 1) {
-          clearInterval(timer);
-          endGame();
-          return 0;
-        }
-        return prevTime - 1;
-      });
-    }, 1000);
-  };
-
-  const endGame = () => {
-    setIsGameActive(false);
-    // Handle game over logic
-  };
-
-  const shootArrow = (angle, power) => {
-    if (isArrowFlying) return;
-
-    setIsArrowFlying(true);
-    const trajectory = calculateTrajectory(angle, power);
-    setArrowTrajectory(trajectory);
-
-    Animated.timing(arrowAnimation, {
-      toValue: { x: trajectory.targetX, y: trajectory.targetY },
-      duration: 1000,
-      useNativeDriver: true,
-    }).start(() => {
-      checkHit(trajectory.targetX, trajectory.targetY);
-      resetArrow();
-    });
-  };
-
-  const calculateTrajectory = (angle, power) => {
-    const normalizedPower = power / MAX_PULL; // 0 to 1
-    const maxDistance = 300; // Maximum shooting distance
-    const targetX = Math.cos(angle) * (maxDistance * normalizedPower);
-    const targetY = Math.sin(angle) * (maxDistance * normalizedPower);
-    return { targetX, targetY };
-  };
-
-  const checkHit = (x, y) => {
-    targets.forEach((target) => {
-      const distance = Math.sqrt(
-        Math.pow(x - target.x, 2) + Math.pow(y - target.y, 2)
-      );
-      if (distance < TARGET_SIZE / 2) {
-        setScore((prevScore) => prevScore + 100);
-        removeTarget(target.id);
-      }
-    });
-  };
-
-  const removeTarget = (targetId) => {
-    setTargets(targets.filter((target) => target.id !== targetId));
-    if (targets.length <= 1) {
-      generateTargets();
-    }
-  };
-
-  const resetArrow = () => {
-    setIsArrowFlying(false);
-    arrowAnimation.setValue({ x: 0, y: 0 });
-  };
-
-  // Render trajectory guide
-  const renderTrajectoryGuide = () => {
-    if (!isDragging || isArrowFlying) return null;
-
-    const guidePoints = [];
-    const steps = 10;
-    const trajectory = calculateTrajectory(aimAngle, pullDistance);
-
-    for (let i = 0; i <= steps; i++) {
-      const progress = i / steps;
-      guidePoints.push(
-        <View
-          key={i}
-          style={[
-            styles.trajectoryDot,
-            {
-              left: arrowPosition.x + trajectory.targetX * progress,
-              top: arrowPosition.y + trajectory.targetY * progress,
-              opacity: 1 - progress,
-            },
-          ]}
-        />
-      );
-    }
-
-    return guidePoints;
-  };
-
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.score}>{score}/500</Text>
         <Text style={styles.timer}>{timeLeft}s</Text>
       </View>
 
-      {/* Game Area */}
       <View style={styles.gameArea} {...panResponder.panHandlers}>
-        {/* Trajectory Guide */}
-        {renderTrajectoryGuide()}
-
-        {/* Targets */}
         {targets.map((target) => (
           <View
             key={target.id}
@@ -199,8 +106,7 @@ const PlayGame = ({navigation}) => {
           />
         ))}
 
-        {/* Archer and Arrow */}
-        <View style={[styles.archer, { left: arrowPosition.x - ARCHER_SIZE / 2 }]}>
+        <View style={[styles.archer, { left: SCREEN_WIDTH / 2 - ARCHER_SIZE / 2 }]}>
           <Animated.View
             style={[
               styles.arrow,
@@ -218,22 +124,27 @@ const PlayGame = ({navigation}) => {
               style={[
                 styles.aimLine,
                 {
-                  width: pullDistance,
+                  width: 100, // Fixed length aim line
                   transform: [{ rotate: `${aimAngle}rad` }],
                 },
               ]}
             />
           )}
         </View>
-      </View>
 
-      {/* Game Controls */}
-      <TouchableOpacity
-        style={styles.shootButton}
-        onPress={() => shootArrow(Math.PI / 4, MAX_PULL)} // 45 degrees angle
-      >
-        <Text style={styles.shootButtonText}>SHOOT</Text>
-      </TouchableOpacity>
+        {/* Shoot Button */}
+        <TouchableOpacity
+          style={styles.shootButton}
+          onPress={shootArrow}
+          disabled={isArrowFlying}>
+          <Text style={styles.shootButtonText}>SHOOT</Text>
+        </TouchableOpacity>
+
+        <View style={styles.debugInfo}>
+          <Text>Angle: {Math.round(aimAngle * 180 / Math.PI)}°</Text>
+          <Text>Flying: {isArrowFlying ? 'Yes' : 'No'}</Text>
+        </View>
+      </View>
     </View>
   );
 };
@@ -261,7 +172,6 @@ const styles = StyleSheet.create({
   },
   gameArea: {
     flex: 1,
-    position: 'relative',
   },
   target: {
     position: 'absolute',
@@ -284,28 +194,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#171717',
     top: ARCHER_SIZE / 2,
     left: ARCHER_SIZE / 2,
-    transformOrigin: 'left',
-  },
-  shootButton: {
-    position: 'absolute',
-    bottom: 20,
-    alignSelf: 'center',
-    backgroundColor: '#C6A44E',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-  },
-  shootButtonText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  trajectoryDot: {
-    position: 'absolute',
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: 'rgba(198, 164, 78, 0.5)',
   },
   aimLine: {
     position: 'absolute',
@@ -313,7 +201,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#C6A44E',
     top: ARCHER_SIZE / 2,
     left: ARCHER_SIZE / 2,
-    transformOrigin: 'left',
+  },
+  shootButton: {
+    position: 'absolute',
+    bottom: 20,
+    alignSelf: 'center',
+    backgroundColor: '#C6A44E',
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 10,
+  },
+  shootButtonText: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  debugInfo: {
+    position: 'absolute',
+    top: 100,
+    left: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    padding: 10,
   },
 });
 
