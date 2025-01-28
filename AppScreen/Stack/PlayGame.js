@@ -44,6 +44,13 @@ const PlayGame = () => {
   // console.log('gameScores', gameScores);
   const arrowAnimation = useRef(new Animated.ValueXY()).current;
 
+  // Format time to MM:SS
+  const formatTime = seconds => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
   useEffect(() => {
     generateTargets();
     const timer = setInterval(() => {
@@ -256,10 +263,10 @@ const PlayGame = () => {
   return (
     <View style={styles.container}>
       <Header score={score} />
-      {/* <View style={styles.header}>
-        <Text style={styles.score}>{score}/500</Text>
-        <Text style={styles.timer}>{timeLeft}s</Text>
-      </View> */}
+      <View style={styles.header}>
+        {/* <Text style={styles.score}>{score}/500</Text> */}
+        <Text style={styles.timer}>{formatTime(timeLeft)}</Text>
+      </View>
 
       <View style={styles.gameArea} {...panResponder.panHandlers}>
         {/* Power meter with improved percentage display */}
@@ -446,10 +453,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF5E0',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    // flexDirection: 'row',
+    // justifyContent: 'space-between',
     padding: 20,
     backgroundColor: '#171717',
+    position: 'absolute',
+    top: '7%',
+    left: 0,
+    right: 0,
+    zIndex: 1000,
+    width: '20%',
+    alignSelf: 'center',
+    borderRadius: 10,
+    padding: 10,
+    marginLeft: '40%',
   },
   score: {
     color: '#C6A44E',
@@ -457,9 +474,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   timer: {
-    color: '#FFF',
+    color: '#C6A44E',
     fontSize: 18,
     fontWeight: 'bold',
+    minWidth: 60, // Ensure consistent width for timer
+    textAlign: 'center',
   },
   gameArea: {
     flex: 1,
