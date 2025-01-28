@@ -5,6 +5,7 @@ const GameContext = createContext({
   gameScores: [],
   totalScore: 0,
   addGameScore: async (score) => {},
+  deductScore: async (amount) => {},
   getTotalScore: () => 0,
 });
 
@@ -50,6 +51,29 @@ export function GameProvider({ children }) {
     }
   };
 
+  // New function to handle score deduction
+  const deductScore = async (amount) => {
+    try {
+      const newTotal = totalScore - amount;
+      if (newTotal >= 0) {
+        // Update the last game score to reflect deduction
+        const updatedScores = [...gameScores];
+        if (updatedScores.length > 0) {
+          updatedScores[updatedScores.length - 1].score -= amount;
+        }
+        
+        await AsyncStorage.setItem('gameScores', JSON.stringify(updatedScores));
+        setGameScores(updatedScores);
+        setTotalScore(newTotal);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error deducting score:', error);
+      return false;
+    }
+  };
+
   // Get total score from state
   const getTotalScore = () => totalScore;
 
@@ -58,6 +82,7 @@ export function GameProvider({ children }) {
       gameScores, 
       totalScore,
       addGameScore,
+      deductScore,
       getTotalScore,
     }}>
       {children}

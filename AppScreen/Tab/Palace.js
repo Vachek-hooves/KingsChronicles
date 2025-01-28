@@ -7,14 +7,106 @@ import {
   TouchableOpacity,
   SafeAreaView,
   ScrollView,
+  Alert,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {PALACE_DATA} from '../../data/PalaceData';
 import MainLayout from '../../components/Layout/MainLayout';
+import { useGame } from '../../store/context';
+
+const UNLOCK_COST = 1000;
+const PALACE_UNLOCK_KEY = 'unlockedPalaces';
 
 const Palace = ({navigation}) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const currentPalace = PALACE_DATA[currentIndex];
+  const [palaceData, setPalaceData] = useState(PALACE_DATA);
+  const { totalScore, deductScore } = useGame();
+
+  // Load unlocked palaces from storage
+  useEffect(() => {
+    loadUnlockedPalaces();
+  }, []);
+
+  const loadUnlockedPalaces = async () => {
+    try {
+      const unlockedPalaces = await AsyncStorage.getItem(PALACE_UNLOCK_KEY);
+      if (unlockedPalaces) {
+        const unlockedIds = JSON.parse(unlockedPalaces);
+        const updatedPalaces = palaceData.map(palace => ({
+          ...palace,
+          isLocked: !unlockedIds.includes(palace.id)
+        }));
+        setPalaceData(updatedPalaces);
+      }
+    } catch (error) {
+      console.error('Error loading unlocked palaces:', error);
+    }
+  };
+
+  const saveUnlockedPalace = async (palaceId) => {
+    try {
+      const existingUnlocked = await AsyncStorage.getItem(PALACE_UNLOCK_KEY);
+      const unlockedIds = existingUnlocked ? JSON.parse(existingUnlocked) : [];
+      const updatedUnlocked = [...unlockedIds, palaceId];
+      await AsyncStorage.setItem(PALACE_UNLOCK_KEY, JSON.stringify(updatedUnlocked));
+    } catch (error) {
+      console.error('Error saving unlocked palace:', error);
+    }
+  };
+
+  const handleUnlockPalace = async () => {
+    const currentPalace = palaceData[currentIndex];
+    
+    if (totalScore >= UNLOCK_COST) {
+      Alert.alert(
+        'Unlock Palace',
+        `Do you want to spend ${UNLOCK_COST} coins to unlock this palace?`,
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel'
+          },
+          {
+            text: 'Unlock',
+            onPress: async () => {
+              // Use the new deductScore function
+              const success = await deductScore(UNLOCK_COST);
+              
+              if (success) {
+                // Update palace data
+                const updatedPalaces = [...palaceData];
+                updatedPalaces[currentIndex] = {
+                  ...currentPalace,
+                  isLocked: false
+                };
+                setPalaceData(updatedPalaces);
+                
+                // Save unlocked status
+                await saveUnlockedPalace(currentPalace.id);
+                
+                // Show success message
+                Alert.alert('Success', 'Palace unlocked successfully!');
+              } else {
+                Alert.alert('Error', 'Failed to unlock palace. Please try again.');
+              }
+            }
+          }
+        ]
+      );
+    } else {
+      Alert.alert('Insufficient Coins', 'You need more coins to unlock this palace.');
+    }
+  };
+
+  const handlePalaceAction = () => {
+    const currentPalace = palaceData[currentIndex];
+    if (!currentPalace.isLocked) {
+      navigation.navigate('PalaceDetails', {palace: currentPalace});
+    } else {
+      handleUnlockPalace();
+    }
+  };
 
   const handleNext = () => {
     if (currentIndex < PALACE_DATA.length - 1) {
@@ -28,20 +120,15 @@ const Palace = ({navigation}) => {
     }
   };
 
-  const handlePalaceAction = () => {
-    if (!currentPalace.isLocked) {
-      // Navigate to palace details
-      navigation.navigate('PalaceDetails', {palace: currentPalace});
-    } else {
-      // Handle unlock palace with coins
-      console.log('Unlock palace with coins');
-    }
-  };
-
   return (
     <MainLayout>
       <SafeAreaView style={styles.container}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
+          {/* Total Score Display */}
+          <View style={styles.scoreContainer}>
+            <Text style={styles.scoreText}>Total Coins: {totalScore}</Text>
+          </View>
+
           {/* Navigation Arrows */}
           <View style={styles.navigationContainer}>
             <TouchableOpacity
@@ -74,7 +161,7 @@ const Palace = ({navigation}) => {
           {/* Palace Image */}
           <View style={styles.imageContainer}>
             <Image
-              source={currentPalace.image}
+              source={palaceData[currentIndex].image}
               style={styles.palaceImage}
               resizeMode="cover"
             />
@@ -84,12 +171,12 @@ const Palace = ({navigation}) => {
           <TouchableOpacity
             style={[
               styles.actionButton,
-              currentPalace.isLocked ? styles.lockedButton : styles.learnButton,
+              palaceData[currentIndex].isLocked ? styles.lockedButton : styles.learnButton,
             ]}
             onPress={handlePalaceAction}>
-            {currentPalace.isLocked ? (
+            {palaceData[currentIndex].isLocked ? (
               <View style={styles.coinContainer}>
-                <Text style={styles.coinText}>1000</Text>
+                <Text style={styles.coinText}>{UNLOCK_COST}</Text>
                 <Image
                   source={require('../../assets/image/icons/coin.png')}
                   style={styles.coinIcon}
@@ -175,6 +262,15 @@ const styles = StyleSheet.create({
   coinIcon: {
     width: 20,
     height: 20,
+  },
+  scoreContainer: {
+    padding: 10,
+    alignItems: 'center',
+  },
+  scoreText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#C6A44E',
   },
 });
 
