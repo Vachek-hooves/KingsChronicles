@@ -10,6 +10,7 @@ import {
   PanResponder,
   Modal,
 } from 'react-native';
+import Header from '../../components/Game/Header';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -120,7 +121,7 @@ const PlayGame = () => {
   };
 
   const generateNewTargets = () => {
-    return Array.from({ length: 3 }, (_, i) => ({
+    return Array.from({length: 3}, (_, i) => ({
       id: i,
       x: 50 + Math.random() * (SCREEN_WIDTH - TARGET_SIZE - 100),
       y: 100 + Math.random() * (SCREEN_HEIGHT / 3),
@@ -225,7 +226,7 @@ const PlayGame = () => {
     setTargets(generateNewTargets());
     setShowSuccessModal(false);
     setIsArrowFlying(false);
-    arrowAnimation.setValue({ x: 0, y: 0 });
+    arrowAnimation.setValue({x: 0, y: 0});
   };
 
   // Add game over check when time runs out
@@ -238,10 +239,11 @@ const PlayGame = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <Header score={score} />
+      {/* <View style={styles.header}>
         <Text style={styles.score}>{score}/500</Text>
         <Text style={styles.timer}>{timeLeft}s</Text>
-      </View>
+      </View> */}
 
       <View style={styles.gameArea} {...panResponder.panHandlers}>
         {/* Power meter with improved percentage display */}
@@ -388,21 +390,14 @@ const PlayGame = () => {
       </View>
 
       {/* Success Modal */}
-      <Modal
-        transparent
-        visible={showSuccessModal}
-        animationType="fade"
-      >
+      <Modal transparent visible={showSuccessModal} animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>
               {score >= WINNING_SCORE ? 'Congratulations!' : 'Game Over!'}
             </Text>
             <Text style={styles.modalScore}>Final Score: {score}</Text>
-            <TouchableOpacity
-              style={styles.modalButton}
-              onPress={resetGame}
-            >
+            <TouchableOpacity style={styles.modalButton} onPress={resetGame}>
               <Text style={styles.modalButtonText}>Play Again</Text>
             </TouchableOpacity>
           </View>
@@ -476,7 +471,7 @@ const styles = StyleSheet.create({
     // top: ARCHER_SIZE / 2 - ARROW_SIZE / 2,
     // left: ARCHER_SIZE / 2,
     height: 100,
-    top: 80,
+    top: 200,
   },
   aimLine: {
     position: 'absolute',
@@ -512,14 +507,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     borderRadius: 10,
     zIndex: 999,
-    
   },
   shootButtonText: {
     color: '#FFF',
     fontSize: 18,
     fontWeight: 'bold',
     padding: 10,
-    zIndex:1000
+    zIndex: 1000,
   },
   debugInfo: {
     position: 'absolute',
