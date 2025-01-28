@@ -11,6 +11,8 @@ import {
   Modal,
 } from 'react-native';
 import Header from '../../components/Game/Header';
+import { useNavigation } from '@react-navigation/native';
+import { useGame } from '../../store/context';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -26,6 +28,8 @@ const TARGET_SCORE = 100; // Score per target hit
 const WINNING_SCORE = 500; // Total score needed to win
 
 const PlayGame = () => {
+  const navigation = useNavigation();
+  const { addGameScore, gameScores } = useGame();
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
   const [targets, setTargets] = useState([]);
@@ -37,7 +41,7 @@ const PlayGame = () => {
   const [power, setPower] = useState(MAX_POWER);
   const [arrowPath, setArrowPath] = useState([]); // Track arrow path
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-
+  console.log('gameScores', gameScores);
   const arrowAnimation = useRef(new Animated.ValueXY()).current;
 
   useEffect(() => {
@@ -53,15 +57,15 @@ const PlayGame = () => {
     const targetPositions = [
       {
         x: SCREEN_WIDTH * 0.2,  // Left target
-        y: SCREEN_HEIGHT * 0.2,
+        y: SCREEN_HEIGHT * 0.25,
       },
       {
         x: SCREEN_WIDTH * 0.5,   // Top center target
-        y: SCREEN_HEIGHT * 0.1,
+        y: SCREEN_HEIGHT * 0.16,
       },
       {
         x: SCREEN_WIDTH * 0.8,  // Right target
-        y: SCREEN_HEIGHT * 0.17,
+        y: SCREEN_HEIGHT * 0.23,
       }
     ];
 
@@ -84,36 +88,33 @@ const PlayGame = () => {
   };
 
   const checkHits = (arrowX, arrowY) => {
-    setDebugPoint({x: arrowX, y: arrowY});
-
+    setDebugPoint({ x: arrowX, y: arrowY });
+    
     let hitSomething = false;
-
+    
     setTargets(currentTargets => {
       const newTargets = currentTargets.map(target => {
-        // Check if arrow passes through target
         const targetCenterX = target.x + TARGET_SIZE / 2;
         const targetCenterY = target.y + TARGET_SIZE / 2;
-
-        // Calculate distance from arrow to target center
+        
         const distance = Math.sqrt(
           Math.pow(arrowX - targetCenterX, 2) +
-            Math.pow(arrowY - targetCenterY, 2),
+          Math.pow(arrowY - targetCenterY, 2)
         );
 
         if (distance < HIT_THRESHOLD && !target.isHit) {
           hitSomething = true;
-          return {...target, isHit: true};
+          return { ...target, isHit: true };
         }
         return target;
       });
 
       if (hitSomething) {
-        // Update score when target is hit
         setScore(prevScore => {
-          const newScore = prevScore + TARGET_SCORE;
-          // Check if player won
-          if (newScore >= WINNING_SCORE) {
-            setShowSuccessModal(true);
+          const newScore = prevScore + 100;
+          // Check if all targets are hit (300 points total)
+          if (newScore >= 300) {
+            handleGameComplete(newScore);
           }
           return newScore;
         });
@@ -121,17 +122,17 @@ const PlayGame = () => {
 
       return newTargets;
     });
+  };
 
-    // Generate new targets if all are hit
-    if (hitSomething) {
+  const handleGameComplete = async (finalScore) => {
+    try {
+      await addGameScore(finalScore);
+      // Short delay before navigation
       setTimeout(() => {
-        setTargets(currentTargets => {
-          if (currentTargets.every(t => t.isHit)) {
-            return generateNewTargets();
-          }
-          return currentTargets;
-        });
+        navigation.navigate('TabBarNavigation', {screen: 'Game'});
       }, 500);
+    } catch (error) {
+      console.error('Error saving game score:', error);
     }
   };
 

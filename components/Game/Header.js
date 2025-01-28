@@ -12,7 +12,7 @@ const Header = ({score}) => {
           ]}
         />
         <View style={styles.scoreContainer}>
-          <Text style={styles.score}>{score}/500</Text>
+          <Text style={styles.score}>{score}</Text>
           <Image
             source={require('../../assets/image/arrowgame/coin.png')}
             style={styles.coinIcon}

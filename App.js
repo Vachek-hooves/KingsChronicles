@@ -10,14 +10,16 @@ import TabBarNavigation from './AppScreen/TabBarNavigation';
 import BattleScreen from './AppScreen/Stack/BattleScreen';
 import PalaceDetails from './AppScreen/Stack/PalaceDetails';
 import PlayGame from './AppScreen/Stack/PlayGame';
+import { GameProvider } from './store/context';
 
 const Stack = createNativeStackNavigator();
 
 function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{headerShown: false}}>
-        <Stack.Screen name="WelcomeScreen" component={WelcomeScreen} />
+    <GameProvider>
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{headerShown: false}}>
+          <Stack.Screen name="WelcomeScreen" component={WelcomeScreen} />
         <Stack.Screen name="TabBarNavigation" component={TabBarNavigation} />
         <Stack.Screen
           name="IntroductionScreen"
@@ -30,6 +32,7 @@ function App() {
         <Stack.Screen name="PlayGame" component={PlayGame} />
       </Stack.Navigator>
     </NavigationContainer>
+    </GameProvider>
   );
 }
 
