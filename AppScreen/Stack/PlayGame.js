@@ -49,16 +49,31 @@ const PlayGame = () => {
   }, []);
 
   const generateTargets = () => {
-    const newTargets = [];
-    for (let i = 0; i < 3; i++) {
-      newTargets.push({
-        id: i,
-        x: 50 + Math.random() * (SCREEN_WIDTH - TARGET_SIZE - 100),
-        y: 100 + Math.random() * (SCREEN_HEIGHT / 2.5),
-        isHit: false,
-      });
-    }
-    setTargets(newTargets);
+    // Fixed positions for targets relative to screen dimensions
+    const targetPositions = [
+      {
+        x: SCREEN_WIDTH * 0.2,  // Left target
+        y: SCREEN_HEIGHT * 0.2,
+      },
+      {
+        x: SCREEN_WIDTH * 0.5,   // Top center target
+        y: SCREEN_HEIGHT * 0.1,
+      },
+      {
+        x: SCREEN_WIDTH * 0.8,  // Right target
+        y: SCREEN_HEIGHT * 0.17,
+      }
+    ];
+
+    const newTargets = targetPositions.map((position, i) => ({
+      id: i,
+      x: position.x - TARGET_SIZE / 2,
+      y: position.y - TARGET_SIZE / 2,
+      isHit: false,
+    }));
+
+    setTargets(newTargets); // Set the targets in state
+    console.log('Generated targets:', newTargets); // Debug log
   };
 
   const updatePower = gesture => {
@@ -245,7 +260,9 @@ const PlayGame = () => {
         <Text style={styles.timer}>{timeLeft}s</Text>
       </View> */}
 
-      <View style={styles.gameArea} {...panResponder.panHandlers}>
+      <View style={styles.gameArea} 
+      {...panResponder.panHandlers}
+      >
         {/* Power meter with improved percentage display */}
         <View style={styles.powerMeterContainer}>
           <Text style={styles.powerLabel}>POWER</Text>
@@ -284,21 +301,25 @@ const PlayGame = () => {
 
         {targets.map(target => (
           <View key={target.id}>
-            <View
+            <Image
+              source={require('../../assets/image/arrowgame/targetSmall.png')}
               style={[
                 styles.target,
-                {left: target.x, top: target.y},
-                target.isHit && styles.targetHit,
+                {
+                  left: target.x,
+                  top: target.y,
+                  opacity: target.isHit ? 0.5 : 1,
+                },
               ]}
             />
+            {/* Debug view to see target position */}
             <View
               style={[
-                styles.targetCenter,
+                styles.targetDebug,
                 {
                   left: target.x + TARGET_SIZE / 2,
                   top: target.y + TARGET_SIZE / 2,
                 },
-                target.isHit && styles.targetCenterHit,
               ]}
             />
           </View>
@@ -435,10 +456,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: TARGET_SIZE,
     height: TARGET_SIZE,
-    borderRadius: TARGET_SIZE / 2,
-    backgroundColor: '#C6A44E',
-    borderWidth: 2,
-    borderColor: 'transparent',
+    resizeMode: 'contain',
   },
   archer: {
     position: 'absolute',
@@ -550,7 +568,7 @@ const styles = StyleSheet.create({
   powerMeterContainer: {
     position: 'absolute',
     left: 20,
-    bottom: 100,
+    bottom: 30,
     alignItems: 'center',
   },
   powerLabel: {
@@ -633,6 +651,14 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  targetDebug: {
+    position: 'absolute',
+    width: 10,
+    height: 10,
+    backgroundColor: 'red',
+    borderRadius: 5,
+    zIndex: 1000,
   },
 });
 
