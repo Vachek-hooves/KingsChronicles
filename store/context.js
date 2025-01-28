@@ -1,18 +1,21 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, {createContext, useState, useContext} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const GameContext = createContext({
   gameScores: [],
   totalScore: 0,
-  addGameScore: async (score) => {},
-  deductScore: async (amount) => {},
+  addGameScore: async score => {},
+  deductScore: async amount => {},
   getTotalScore: () => 0,
+  isMusicEnable: () => {},
+  setIsMusicEnable: () => {},
 });
 
-export function GameProvider({ children }) {
+export function GameProvider({children}) {
   const [gameScores, setGameScores] = useState([]);
   const [totalScore, setTotalScore] = useState(0);
-  console.log('totalScore', totalScore);
+  const [isMusicEnable, setIsMusicEnable] = useState(true);
+  // console.log('totalScore', totalScore);
 
   // Load scores from AsyncStorage when app starts
   React.useEffect(() => {
@@ -34,13 +37,13 @@ export function GameProvider({ children }) {
     }
   };
 
-  const addGameScore = async (score) => {
+  const addGameScore = async score => {
     try {
       const newScore = {
         score,
         date: new Date().toISOString(),
       };
-      
+
       const updatedScores = [...gameScores, newScore];
       await AsyncStorage.setItem('gameScores', JSON.stringify(updatedScores));
       setGameScores(updatedScores);
@@ -52,7 +55,7 @@ export function GameProvider({ children }) {
   };
 
   // New function to handle score deduction
-  const deductScore = async (amount) => {
+  const deductScore = async amount => {
     try {
       const newTotal = totalScore - amount;
       if (newTotal >= 0) {
@@ -61,7 +64,7 @@ export function GameProvider({ children }) {
         if (updatedScores.length > 0) {
           updatedScores[updatedScores.length - 1].score -= amount;
         }
-        
+
         await AsyncStorage.setItem('gameScores', JSON.stringify(updatedScores));
         setGameScores(updatedScores);
         setTotalScore(newTotal);
@@ -78,13 +81,16 @@ export function GameProvider({ children }) {
   const getTotalScore = () => totalScore;
 
   return (
-    <GameContext.Provider value={{ 
-      gameScores, 
-      totalScore,
-      addGameScore,
-      deductScore,
-      getTotalScore,
-    }}>
+    <GameContext.Provider
+      value={{
+        gameScores,
+        totalScore,
+        addGameScore,
+        deductScore,
+        getTotalScore,
+        isMusicEnable,
+        setIsMusicEnable,
+      }}>
       {children}
     </GameContext.Provider>
   );

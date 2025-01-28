@@ -6,31 +6,58 @@ import {
   Image,
   SafeAreaView,
   ScrollView,
+  Switch,
 } from 'react-native';
 import MainLayout from '../../components/Layout/MainLayout';
+import {useState} from 'react';
+import {useGame} from '../../store/context';
+import {
+  playBackgroundMusic,
+  pauseBackgroundMusic,
+} from '../../components/Sound/SoundSetting';
 
 const Game = ({navigation}) => {
+  const {isMusicEnable, setIsMusicEnable, totalScore} = useGame();
+  console.log(isMusicEnable);
+  console.log(totalScore);
+  // const [isSoundEnabled, setSoundEnabled] = useState(true);
+
+  const handleSoundToggle = async value => {
+    // setSoundEnabled(previousState => !previousState);
+    setIsMusicEnable(value);
+    if (value) {
+      await playBackgroundMusic();
+    } else {
+      pauseBackgroundMusic();
+    }
+  };
+
   return (
     <MainLayout>
       <ScrollView style={{flex: 1}}>
         <SafeAreaView style={styles.container}>
           {/* Header Icons */}
-          {/* <View style={styles.header}>
-          <TouchableOpacity style={styles.iconButton}>
-            <Image 
-              source={require('../../assets/image/game/sound.png')}
-              style={styles.icon}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <Image 
-              source={require('../../assets/image/icons/shop.png')}
-              style={styles.icon}
-            />
-          </TouchableOpacity>
-        </View> */}
-
-          {/* King Character */}
+          <View style={styles.header}>
+            <View style={styles.soundControl}>
+              <Image
+                source={require('../../assets/image/game/sound.png')}
+                style={styles.icon}
+              />
+              <Switch
+                value={isMusicEnable}
+                onValueChange={handleSoundToggle}
+                trackColor={{false: '#FFFFFF', true: '#C6A44E'}}
+                thumbColor={'#171717'}
+                style={styles.switch}
+              />
+            </View>
+            {/* <TouchableOpacity style={styles.iconButton}>
+              <Image 
+                source={require('../../assets/image/icons/shop.png')}
+                style={styles.icon}
+              />
+            </TouchableOpacity> */}
+          </View>
           <View style={styles.kingContainer}>
             <Image
               source={require('../../assets/image/game/king.png')}
@@ -59,15 +86,6 @@ const Game = ({navigation}) => {
             onPress={() => navigation.navigate('PlayGame')}>
             <Text style={styles.playButtonText}>Begin Your Glory</Text>
           </TouchableOpacity>
-
-          {/* Bottom Navigation Icons */}
-          {/* <View style={styles.bottomNav}>
-          <Image source={require('../../assets/image/icons/games.png')} style={styles.navIcon} />
-          <Image source={require('../../assets/image/icons/pets.png')} style={styles.navIcon} />
-          <Image source={require('../../assets/image/icons/crown.png')} style={styles.navIcon} />
-          <Image source={require('../../assets/image/icons/scroll.png')} style={styles.navIcon} />
-          <Image source={require('../../assets/image/icons/castle.png')} style={styles.navIcon} />
-        </View> */}
         </SafeAreaView>
       </ScrollView>
     </MainLayout>
@@ -84,6 +102,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingTop: 10,
+    alignItems: 'center',
+  },
+  soundControl: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
   iconButton: {
     backgroundColor: '#C6A44E',
@@ -91,9 +115,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   icon: {
-    width: 24,
-    height: 24,
-    tintColor: '#171717',
+    width: 34,
+    height: 34,
+    // tintColor: '#171717',
+  },
+  switch: {
+    transform: [{scale: 0.8}], // Makes the switch slightly smaller
   },
   kingContainer: {
     alignItems: 'center',
