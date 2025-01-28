@@ -8,6 +8,7 @@ import {
   Animated,
   TouchableOpacity,
   PanResponder,
+  Modal,
 } from 'react-native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -20,6 +21,8 @@ const MAX_PULL = 150;
 const HIT_THRESHOLD = TARGET_SIZE; // Made even more forgiving
 const MAX_POWER = 700;
 const MIN_POWER = 200;
+const TARGET_SCORE = 100; // Score per target hit
+const WINNING_SCORE = 500; // Total score needed to win
 
 const PlayGame = () => {
   const [score, setScore] = useState(0);
@@ -32,6 +35,7 @@ const PlayGame = () => {
   const [debugPoint, setDebugPoint] = useState(null); // Add debug point state
   const [power, setPower] = useState(MAX_POWER);
   const [arrowPath, setArrowPath] = useState([]); // Track arrow path
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const arrowAnimation = useRef(new Animated.ValueXY()).current;
 
@@ -88,7 +92,15 @@ const PlayGame = () => {
       });
 
       if (hitSomething) {
-        setScore(prev => prev + 100);
+        // Update score when target is hit
+        setScore(prevScore => {
+          const newScore = prevScore + TARGET_SCORE;
+          // Check if player won
+          if (newScore >= WINNING_SCORE) {
+            setShowSuccessModal(true);
+          }
+          return newScore;
+        });
       }
 
       return newTargets;
@@ -99,17 +111,21 @@ const PlayGame = () => {
       setTimeout(() => {
         setTargets(currentTargets => {
           if (currentTargets.every(t => t.isHit)) {
-            return Array.from({length: 3}, (_, i) => ({
-              id: i,
-              x: 50 + Math.random() * (SCREEN_WIDTH - TARGET_SIZE - 100),
-              y: 100 + Math.random() * (SCREEN_HEIGHT / 2.5),
-              isHit: false,
-            }));
+            return generateNewTargets();
           }
           return currentTargets;
         });
       }, 500);
     }
+  };
+
+  const generateNewTargets = () => {
+    return Array.from({ length: 3 }, (_, i) => ({
+      id: i,
+      x: 50 + Math.random() * (SCREEN_WIDTH - TARGET_SIZE - 100),
+      y: 100 + Math.random() * (SCREEN_HEIGHT / 3),
+      isHit: false,
+    }));
   };
 
   const shootArrow = () => {
@@ -202,6 +218,23 @@ const PlayGame = () => {
   const getPowerPercentage = () => {
     return Math.round(((power - MIN_POWER) / (MAX_POWER - MIN_POWER)) * 100);
   };
+
+  const resetGame = () => {
+    setScore(0);
+    setTimeLeft(GAME_DURATION);
+    setTargets(generateNewTargets());
+    setShowSuccessModal(false);
+    setIsArrowFlying(false);
+    arrowAnimation.setValue({ x: 0, y: 0 });
+  };
+
+  // Add game over check when time runs out
+  useEffect(() => {
+    if (timeLeft === 0) {
+      // Game over logic
+      setShowSuccessModal(true);
+    }
+  }, [timeLeft]);
 
   return (
     <View style={styles.container}>
@@ -353,6 +386,28 @@ const PlayGame = () => {
           <Text>Score: {score}</Text>
         </View>
       </View>
+
+      {/* Success Modal */}
+      <Modal
+        transparent
+        visible={showSuccessModal}
+        animationType="fade"
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>
+              {score >= WINNING_SCORE ? 'Congratulations!' : 'Game Over!'}
+            </Text>
+            <Text style={styles.modalScore}>Final Score: {score}</Text>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={resetGame}
+            >
+              <Text style={styles.modalButtonText}>Play Again</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -464,6 +519,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     padding: 10,
+    zIndex:1000
   },
   debugInfo: {
     position: 'absolute',
@@ -548,6 +604,41 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: '100%',
     borderRadius: 10,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#FFF',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    minWidth: 300,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#171717',
+    marginBottom: 10,
+  },
+  modalScore: {
+    fontSize: 18,
+    color: '#171717',
+    marginBottom: 20,
+  },
+  modalButton: {
+    backgroundColor: '#C6A44E',
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+  },
+  modalButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
