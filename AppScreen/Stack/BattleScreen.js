@@ -6,6 +6,7 @@ import {
   Dimensions,
   TouchableOpacity,
   SafeAreaView,
+  ImageBackground,
 } from 'react-native';
 import React, {useState} from 'react';
 import {BATTLE_DATA} from '../../data/BattleData';
@@ -53,13 +54,12 @@ const BattleScreen = ({route}) => {
 
           {/* Battle Image */}
           <View style={styles.imageContainer}>
-            <Image
+            <ImageBackground
               source={currentDescription.image}
               style={styles.battleImage}
               resizeMode="cover"
-            />
-
-            {/* Navigation Arrows */}
+            >
+              {/* Navigation Arrows */}
             <View style={styles.navigationContainer}>
               <TouchableOpacity
                 onPress={handlePrevious}
@@ -88,6 +88,37 @@ const BattleScreen = ({route}) => {
                 />
               </TouchableOpacity>
             </View>
+            </ImageBackground>
+
+            {/* Navigation Arrows */}
+            {/* <View style={styles.navigationContainer}>
+              <TouchableOpacity
+                onPress={handlePrevious}
+                disabled={currentIndex === 0}
+                style={[
+                  styles.navButton,
+                  currentIndex === 0 && styles.navButtonDisabled,
+                ]}>
+                <Image
+                  source={require('../../assets/image/icons/arrowLeft.png')}
+                  style={styles.navIcon}
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleNext}
+                disabled={currentIndex === battleDetails.description.length - 1}
+                style={[
+                  styles.navButton,
+                  currentIndex === battleDetails.description.length - 1 &&
+                    styles.navButtonDisabled,
+                ]}>
+                <Image
+                  source={require('../../assets/image/icons/arrowLeft.png')}
+                  style={[styles.navIcon, {transform: [{rotate: '180deg'}]}]}
+                />
+              </TouchableOpacity>
+            </View> */}
           </View>
 
           {/* Text Below */}
@@ -179,7 +210,7 @@ const styles = StyleSheet.create({
   navButton: {
     // width: 40,
     // height: 40,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
