@@ -1,21 +1,21 @@
-import { 
-  StyleSheet, 
-  Text, 
-  View, 
-  TouchableOpacity, 
-  Image, 
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Image,
   SafeAreaView,
-  ScrollView
+  ScrollView,
 } from 'react-native';
 import MainLayout from '../../components/Layout/MainLayout';
 
 const Game = ({navigation}) => {
   return (
     <MainLayout>
-      <ScrollView>
+      <ScrollView style={{flex: 1}}>
         <SafeAreaView style={styles.container}>
           {/* Header Icons */}
-        {/* <View style={styles.header}>
+          {/* <View style={styles.header}>
           <TouchableOpacity style={styles.iconButton}>
             <Image 
               source={require('../../assets/image/game/sound.png')}
@@ -30,46 +30,45 @@ const Game = ({navigation}) => {
           </TouchableOpacity>
         </View> */}
 
-        {/* King Character */}
-        <View style={styles.kingContainer}>
-          <Image 
-            source={require('../../assets/image/game/king.png')}
-            style={styles.kingImage}
-            resizeMode="contain"
-          />
-        </View>
+          {/* King Character */}
+          <View style={styles.kingContainer}>
+            <Image
+              source={require('../../assets/image/game/king.png')}
+              style={styles.kingImage}
+              resizeMode="contain"
+            />
+          </View>
 
-        {/* Game Description */}
-        <View style={styles.descriptionContainer}>
-          <Text style={styles.descriptionText}>
-            Take part in the legendary King's Tournament, where precision and 
-            strategy reign supreme. Step into the boots of a fearless knight and 
-            test your skills by hurling spears at challenging targets. From steady 
-            aims at static goals to quick thinking for moving ones, every throw 
-            brings you closer to glory. Will you earn enough coins to unlock the 
-            next challenge and prove yourself as the kingdom's ultimate champion? 
-            The throne awaits those with unmatched accuracy and unwavering 
-            determination!
-          </Text>
-        </View>
+          {/* Game Description */}
+          <View style={styles.descriptionContainer}>
+            <Text style={styles.descriptionText}>
+              Take part in the legendary King's Tournament, where precision and
+              strategy reign supreme. Step into the boots of a fearless knight
+              and test your skills by hurling spears at challenging targets.
+              From steady aims at static goals to quick thinking for moving
+              ones, every throw brings you closer to glory. Will you earn enough
+              coins to unlock the next challenge and prove yourself as the
+              kingdom's ultimate champion? The throne awaits those with
+              unmatched accuracy and unwavering determination!
+            </Text>
+          </View>
 
-        {/* Play Button */}
-        <TouchableOpacity 
-          style={styles.playButton}
-          onPress={() => navigation.navigate('PlayGame')}
-        >
-          <Text style={styles.playButtonText}>Begin Your Glory</Text>
-        </TouchableOpacity>
+          {/* Play Button */}
+          <TouchableOpacity
+            style={styles.playButton}
+            onPress={() => navigation.navigate('PlayGame')}>
+            <Text style={styles.playButtonText}>Begin Your Glory</Text>
+          </TouchableOpacity>
 
-        {/* Bottom Navigation Icons */}
-        {/* <View style={styles.bottomNav}>
+          {/* Bottom Navigation Icons */}
+          {/* <View style={styles.bottomNav}>
           <Image source={require('../../assets/image/icons/games.png')} style={styles.navIcon} />
           <Image source={require('../../assets/image/icons/pets.png')} style={styles.navIcon} />
           <Image source={require('../../assets/image/icons/crown.png')} style={styles.navIcon} />
           <Image source={require('../../assets/image/icons/scroll.png')} style={styles.navIcon} />
           <Image source={require('../../assets/image/icons/castle.png')} style={styles.navIcon} />
         </View> */}
-      </SafeAreaView>
+        </SafeAreaView>
       </ScrollView>
     </MainLayout>
   );
@@ -78,7 +77,7 @@ const Game = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF5E0',
+    // backgroundColor: '#FFF5E0',
   },
   header: {
     flexDirection: 'row',
