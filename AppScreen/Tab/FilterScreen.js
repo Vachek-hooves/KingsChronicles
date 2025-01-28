@@ -12,6 +12,7 @@ import {
 import React, {useState, useEffect} from 'react';
 import MainLayout from '../../components/Layout/MainLayout';
 import {RoyalData} from '../../data/RoyalData';
+import LinearGradient from 'react-native-linear-gradient';
 
 const FilterScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -236,7 +237,11 @@ const FilterScreen = () => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
+          <LinearGradient
+            colors={['#EFDC59', '#AB5F10']}
+            start={{x: 0, y: 0}}
+            end={{x: 1, y: 1}}
+            style={styles.modalContent}>
             {/* Modal Header */}
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Filters</Text>
@@ -268,8 +273,8 @@ const FilterScreen = () => {
               ))}
             </View>
 
-            {/* Filter Items with Toggle Functionality */}
-            <ScrollView style={styles.filterList}>
+            {/* Filter Items */}
+            <ScrollView style={styles.filterList} showsVerticalScrollIndicator={false}>
               {filters[activeFilter].map((filter, index) => (
                 <TouchableOpacity
                   key={index}
@@ -287,19 +292,18 @@ const FilterScreen = () => {
                     ]}>
                     {filter.name}
                   </Text>
-                  <Text
+                  {/* <Text
                     style={[
                       styles.filterCount,
                       selectedFilters[activeFilter] === filter.name &&
                         styles.selectedFilterText,
                     ]}>
-                    {filter.rulers.length}{' '}
-                    {filter.rulers.length === 1 ? 'ruler' : 'rulers'}
-                  </Text>
+                    {filter.rulers.length} {filter.rulers.length === 1 ? 'ruler' : 'rulers'}
+                  </Text> */}
                 </TouchableOpacity>
               ))}
             </ScrollView>
-          </View>
+          </LinearGradient>
         </View>
       </Modal>
 
@@ -382,40 +386,44 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#C5A572',
+    borderColor: '#FFF',
   },
   activeCategory: {
-    backgroundColor: '#C5A572',
+    backgroundColor: '#FFF',
   },
   categoryText: {
-    color: '#C5A572',
+    color: '#FFF',
     fontSize: 16,
     fontWeight: '600',
   },
   activeCategoryText: {
-    color: '#FFF',
+    color: '#AB5F10',
   },
   filterList: {
     flex: 1,
+    marginHorizontal: 20,
+    marginBottom: 30,
   },
   filterItem: {
     paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
+    borderBottomColor: 'rgba(255, 255, 255, 0.2)',
+    // marginHorizontal: 20,
   },
   filterName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000',
+    color: '#FFF',
     marginBottom: 5,
   },
   filterCount: {
     fontSize: 14,
-    color: '#666',
+    color: 'rgba(255, 255, 255, 0.8)',
   },
   selectedFilterItem: {
-    backgroundColor: '#C5A572',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 10,
+    paddingHorizontal: 15,
   },
   selectedFilterText: {
     color: '#FFF',
@@ -499,10 +507,9 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: 'white',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    padding: 20,
+    // padding: 20,
     height: '80%',
   },
   modalHeader: {
@@ -512,17 +519,21 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: '600',
+    color: '#FFF',
+    marginLeft: 20,
   },
   closeButton: {
     padding: 10,
-    backgroundColor: '#C5A572',
+    backgroundColor: '#FFF',
     borderRadius: 20,
+    margin:6
   },
   closeButtonText: {
-    fontSize: 30,
-    color: '#000',
+    fontSize: 20,
+    color: '#AB5F10',
+    fontWeight: '600',
   },
   fullScreenModal: {
     flex: 1,
