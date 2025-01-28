@@ -157,18 +157,20 @@ const FilterScreen = () => {
               </TouchableOpacity>
 
               {/* Selected Filters Display */}
-              <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-              <View style={styles.selectedFiltersContainer}>
-                {Object.entries(selectedFilters).map(
-                  ([category, value]) =>
-                    value && (
+              <ScrollView
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}>
+                <View style={styles.selectedFiltersContainer}>
+                  {Object.entries(selectedFilters).map(
+                    ([category, value]) =>
+                      value && (
                         <View key={category} style={styles.selectedFilterTag}>
                           <Text style={styles.selectedFilterText}>{value}</Text>
                         </View>
-                    ),
-                )}
-              </View>
-                </ScrollView>
+                      ),
+                  )}
+                </View>
+              </ScrollView>
 
               <TouchableOpacity
                 onPress={() => setModalVisible(true)}
@@ -218,14 +220,13 @@ const FilterScreen = () => {
               </View>
             )}
 
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={styles.stepButton}
               onPress={() => {
                 console.log(currentRuler);
-                /* Handle navigation to detail screen */
               }}>
               <Text style={styles.stepButtonText}>Step into History</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -274,7 +275,9 @@ const FilterScreen = () => {
             </View>
 
             {/* Filter Items */}
-            <ScrollView style={styles.filterList} showsVerticalScrollIndicator={false}>
+            <ScrollView
+              style={styles.filterList}
+              showsVerticalScrollIndicator={false}>
               {filters[activeFilter].map((filter, index) => (
                 <TouchableOpacity
                   key={index}
@@ -528,7 +531,7 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: '#FFF',
     borderRadius: 20,
-    margin:6
+    margin: 6,
   },
   closeButtonText: {
     fontSize: 20,
@@ -537,7 +540,8 @@ const styles = StyleSheet.create({
   },
   fullScreenModal: {
     flex: 1,
-    backgroundColor: '#FFF',
+    // backgroundColor: '#FFF',
+    backgroundColor: '#C5A572',
   },
   fullScreenScrollView: {
     flex: 1,
@@ -581,7 +585,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   fullScreenAbout: {
-    fontSize: 16,
+    fontSize: 18,
     lineHeight: 24,
     color: '#333',
     marginBottom: 40,

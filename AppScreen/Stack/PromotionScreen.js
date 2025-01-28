@@ -109,13 +109,13 @@ const styles = StyleSheet.create({
     marginVertical: 40,
   },
   description: {
-    fontSize: 20,
+    fontSize: 22,
     lineHeight: 24,
     color: '#000',
     textAlign: 'left',
     marginBottom: 40,
     fontWeight: '500',
-    lineHeight:26
+    lineHeight:36
   },
   button: {
     backgroundColor: '#C5A572',

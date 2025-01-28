@@ -24,7 +24,7 @@ const Stack = createNativeStackNavigator();
 
 function App() {
   const {isMusicEnable, setIsMusicEnable, totalScore} = useGame();
-
+  const [isPlayMusic, setIsPlayMusic] = useState(false);
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', nextAppState => {

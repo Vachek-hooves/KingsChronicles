@@ -23,24 +23,24 @@ const TabBarNavigation = () => {
         },
       }}>
       <Tab.Screen
-        name="BattleList"
-        component={BattleList}
-        options={{
-          tabBarIcon: ({color, focused}) => (
-            <Image
-              source={require('../assets/image/tabbar/battle.png')}
-              style={[styles.tabIcon, {tintColor: color}]}
-            />
-          ),
-        }}
-      />
-      <Tab.Screen
         name="FilterScreen"
         component={FilterScreen}
         options={{
           tabBarIcon: ({color, focused}) => (
             <Image
               source={require('../assets/image/tabbar/crown.png')}
+              style={[styles.tabIcon, {tintColor: color}]}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="BattleList"
+        component={BattleList}
+        options={{
+          tabBarIcon: ({color, focused}) => (
+            <Image
+              source={require('../assets/image/tabbar/battle.png')}
               style={[styles.tabIcon, {tintColor: color}]}
             />
           ),

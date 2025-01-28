@@ -11,14 +11,14 @@ import {
   Modal,
 } from 'react-native';
 import Header from '../../components/Game/Header';
-import { useNavigation } from '@react-navigation/native';
-import { useGame } from '../../store/context';
+import {useNavigation} from '@react-navigation/native';
+import {useGame} from '../../store/context';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
-const ARCHER_SIZE = 60;
-const TARGET_SIZE = 40;
-const ARROW_SIZE = 30;
+const ARCHER_SIZE = 100;
+const TARGET_SIZE = 50;
+const ARROW_SIZE = 60;
 const GAME_DURATION = 120;
 const MAX_PULL = 150;
 const HIT_THRESHOLD = TARGET_SIZE; // Made even more forgiving
@@ -29,7 +29,7 @@ const WINNING_SCORE = 500; // Total score needed to win
 
 const PlayGame = () => {
   const navigation = useNavigation();
-  const { addGameScore, gameScores } = useGame();
+  const {addGameScore, gameScores} = useGame();
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
   const [targets, setTargets] = useState([]);
@@ -56,17 +56,17 @@ const PlayGame = () => {
     // Fixed positions for targets relative to screen dimensions
     const targetPositions = [
       {
-        x: SCREEN_WIDTH * 0.2,  // Left target
+        x: SCREEN_WIDTH * 0.2, // Left target
         y: SCREEN_HEIGHT * 0.25,
       },
       {
-        x: SCREEN_WIDTH * 0.5,   // Top center target
+        x: SCREEN_WIDTH * 0.5, // Top center target
         y: SCREEN_HEIGHT * 0.16,
       },
       {
-        x: SCREEN_WIDTH * 0.8,  // Right target
+        x: SCREEN_WIDTH * 0.8, // Right target
         y: SCREEN_HEIGHT * 0.23,
-      }
+      },
     ];
 
     const newTargets = targetPositions.map((position, i) => ({
@@ -88,23 +88,23 @@ const PlayGame = () => {
   };
 
   const checkHits = (arrowX, arrowY) => {
-    setDebugPoint({ x: arrowX, y: arrowY });
-    
+    setDebugPoint({x: arrowX, y: arrowY});
+
     let hitSomething = false;
-    
+
     setTargets(currentTargets => {
       const newTargets = currentTargets.map(target => {
         const targetCenterX = target.x + TARGET_SIZE / 2;
         const targetCenterY = target.y + TARGET_SIZE / 2;
-        
+
         const distance = Math.sqrt(
           Math.pow(arrowX - targetCenterX, 2) +
-          Math.pow(arrowY - targetCenterY, 2)
+            Math.pow(arrowY - targetCenterY, 2),
         );
 
         if (distance < HIT_THRESHOLD && !target.isHit) {
           hitSomething = true;
-          return { ...target, isHit: true };
+          return {...target, isHit: true};
         }
         return target;
       });
@@ -124,7 +124,7 @@ const PlayGame = () => {
     });
   };
 
-  const handleGameComplete = async (finalScore) => {
+  const handleGameComplete = async finalScore => {
     try {
       await addGameScore(finalScore);
       // Short delay before navigation
@@ -261,9 +261,7 @@ const PlayGame = () => {
         <Text style={styles.timer}>{timeLeft}s</Text>
       </View> */}
 
-      <View style={styles.gameArea} 
-      {...panResponder.panHandlers}
-      >
+      <View style={styles.gameArea} {...panResponder.panHandlers}>
         {/* Power meter with improved percentage display */}
         <View style={styles.powerMeterContainer}>
           <Text style={styles.powerLabel}>POWER</Text>
@@ -314,7 +312,7 @@ const PlayGame = () => {
               ]}
             />
             {/* Debug view to see target position */}
-            <View
+            {/* <View
               style={[
                 styles.targetDebug,
                 {
@@ -322,7 +320,7 @@ const PlayGame = () => {
                   top: target.y + TARGET_SIZE / 2,
                 },
               ]}
-            />
+            /> */}
           </View>
         ))}
 
@@ -369,12 +367,14 @@ const PlayGame = () => {
         {/* Archer position */}
         <View
           style={[
-            styles.archer,
-            {
-              left: SCREEN_WIDTH / 2 - ARCHER_SIZE / 2,
-              // bottom: 50,
-            },
+            styles.archerContainer,
+            {left: SCREEN_WIDTH / 2 - ARCHER_SIZE / 2},
           ]}>
+          <Image
+            source={require('../../assets/image/arrowgame/archer1.png')}
+            style={styles.archerImage}
+            resizeMode="contain"
+          />
           <Animated.Image
             source={require('../../assets/image/arrowgame/arrow.png')}
             style={[
@@ -404,11 +404,11 @@ const PlayGame = () => {
           </Text>
         </TouchableOpacity>
 
-        <View style={styles.debugInfo}>
+        {/* <View style={styles.debugInfo}>
           <Text>Angle: {Math.round((aimAngle * 180) / Math.PI)}°</Text>
           <Text>Flying: {isArrowFlying ? 'Yes' : 'No'}</Text>
           <Text>Score: {score}</Text>
-        </View>
+        </View> */}
       </View>
 
       {/* Success Modal */}
@@ -430,6 +430,17 @@ const PlayGame = () => {
 };
 
 const styles = StyleSheet.create({
+  archerContainer: {
+    position: 'absolute',
+    bottom: 100,
+    width: ARCHER_SIZE,
+    height: ARCHER_SIZE,
+  },
+  archerImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain',
+  },
   container: {
     flex: 1,
     backgroundColor: '#FFF5E0',
@@ -464,7 +475,7 @@ const styles = StyleSheet.create({
     bottom: 120,
     width: ARCHER_SIZE,
     height: ARCHER_SIZE,
-    backgroundColor: '#171717',
+    // backgroundColor: '#171717',
   },
   directionControl: {
     position: 'absolute',
@@ -509,9 +520,9 @@ const styles = StyleSheet.create({
     height: 0,
     backgroundColor: 'transparent',
     borderStyle: 'solid',
-    borderLeftWidth: 20,
-    borderRightWidth: 20,
-    borderBottomWidth: 35,
+    borderLeftWidth: 15,
+    borderRightWidth: 15,
+    borderBottomWidth: 60,
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
     borderBottomColor: '#C6A44E',
@@ -549,7 +560,7 @@ const styles = StyleSheet.create({
   targetCenter: {
     width: 4,
     height: 4,
-    backgroundColor: '#FF0000',
+    // backgroundColor: '#FF0000',
     borderRadius: 2,
   },
   targetCenterHit: {
@@ -562,7 +573,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 10,
     height: 10,
-    backgroundColor: '#FF0000',
+    // backgroundColor: '#FF0000',
     borderRadius: 5,
     zIndex: 999,
   },
