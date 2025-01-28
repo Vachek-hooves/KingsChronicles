@@ -9,27 +9,24 @@ import {
 } from 'react-native';
 import React from 'react';
 import MainLayout from '../../components/Layout/MainLayout';
+import Back from '../../components/ui/Back';
 
 const PalaceDetails = ({route}) => {
   const {palace} = route.params;
-  
+
   // Split the description at a suitable point (e.g., after the first sentence)
   const descriptionParts = palace.description.split('.');
   const firstPart = descriptionParts[0] + '.';
   const secondPart = descriptionParts.slice(1).join('.');
 
-
   return (
     <MainLayout>
       <SafeAreaView style={styles.container}>
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}>
-          
           {/* First part of description */}
-          <Text style={styles.descriptionText}>
-            {firstPart}
-          </Text>
+          <Text style={styles.descriptionText}>{firstPart}</Text>
 
           {/* Palace Image */}
           <View style={styles.imageContainer}>
@@ -41,9 +38,8 @@ const PalaceDetails = ({route}) => {
           </View>
 
           {/* Second part of description */}
-          <Text style={styles.descriptionText}>
-            {secondPart}
-          </Text>
+          <Text style={styles.descriptionText}>{secondPart}</Text>
+          <Back />
         </ScrollView>
       </SafeAreaView>
     </MainLayout>

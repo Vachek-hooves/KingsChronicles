@@ -7,10 +7,12 @@ import {
   TouchableOpacity,
   SafeAreaView,
   ImageBackground,
+  ScrollView,
 } from 'react-native';
 import React, {useState} from 'react';
 import {BATTLE_DATA} from '../../data/BattleData';
 import MainLayout from '../../components/Layout/MainLayout';
+import Back from '../../components/ui/Back';
 
 const BattleScreen = ({route}) => {
   const {battle} = route.params;
@@ -38,60 +40,65 @@ const BattleScreen = ({route}) => {
 
   return (
     <MainLayout>
-      <SafeAreaView style={styles.container}>
-        {/* Timeline */}
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <SafeAreaView style={styles.container}>
+          {/* Timeline */}
 
-        {/* Content Container */}
-        <View style={styles.contentContainer}>
-          {/* Text Above */}
-          {isTextAbove && (
-            <View style={styles.descriptionContainer}>
-              <Text style={styles.descriptionText}>
-                {currentDescription.text}
-              </Text>
-            </View>
-          )}
+          {/* Content Container */}
+          <View style={styles.contentContainer}>
+            {/* Text Above */}
+            {isTextAbove && (
+              <View style={styles.descriptionContainer}>
+                <Text style={styles.descriptionText}>
+                  {currentDescription.text}
+                </Text>
+              </View>
+            )}
 
-          {/* Battle Image */}
-          <View style={styles.imageContainer}>
-            <ImageBackground
-              source={currentDescription.image}
-              style={styles.battleImage}
-              resizeMode="cover"
-            >
+            {/* Battle Image */}
+            <View style={styles.imageContainer}>
+              <ImageBackground
+                source={currentDescription.image}
+                style={styles.battleImage}
+                resizeMode="cover">
+                {/* Navigation Arrows */}
+                <View style={styles.navigationContainer}>
+                  <TouchableOpacity
+                    onPress={handlePrevious}
+                    disabled={currentIndex === 0}
+                    style={[
+                      styles.navButton,
+                      currentIndex === 0 && styles.navButtonDisabled,
+                    ]}>
+                    <Image
+                      source={require('../../assets/image/icons/arrowLeft.png')}
+                      style={styles.navIcon}
+                    />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={handleNext}
+                    disabled={
+                      currentIndex === battleDetails.description.length - 1
+                    }
+                    style={[
+                      styles.navButton,
+                      currentIndex === battleDetails.description.length - 1 &&
+                        styles.navButtonDisabled,
+                    ]}>
+                    <Image
+                      source={require('../../assets/image/icons/arrowLeft.png')}
+                      style={[
+                        styles.navIcon,
+                        {transform: [{rotate: '180deg'}]},
+                      ]}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </ImageBackground>
+
               {/* Navigation Arrows */}
-            <View style={styles.navigationContainer}>
-              <TouchableOpacity
-                onPress={handlePrevious}
-                disabled={currentIndex === 0}
-                style={[
-                  styles.navButton,
-                  currentIndex === 0 && styles.navButtonDisabled,
-                ]}>
-                <Image
-                  source={require('../../assets/image/icons/arrowLeft.png')}
-                  style={styles.navIcon}
-                />
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={handleNext}
-                disabled={currentIndex === battleDetails.description.length - 1}
-                style={[
-                  styles.navButton,
-                  currentIndex === battleDetails.description.length - 1 &&
-                    styles.navButtonDisabled,
-                ]}>
-                <Image
-                  source={require('../../assets/image/icons/arrowLeft.png')}
-                  style={[styles.navIcon, {transform: [{rotate: '180deg'}]}]}
-                />
-              </TouchableOpacity>
-            </View>
-            </ImageBackground>
-
-            {/* Navigation Arrows */}
-            {/* <View style={styles.navigationContainer}>
+              {/* <View style={styles.navigationContainer}>
               <TouchableOpacity
                 onPress={handlePrevious}
                 disabled={currentIndex === 0}
@@ -119,31 +126,34 @@ const BattleScreen = ({route}) => {
                 />
               </TouchableOpacity>
             </View> */}
+            </View>
+
+            {/* Text Below */}
+            {!isTextAbove && (
+              <View style={styles.descriptionContainer}>
+                <Text style={styles.descriptionText}>
+                  {currentDescription.text}
+                </Text>
+              </View>
+            )}
           </View>
 
-          {/* Text Below */}
-          {!isTextAbove && (
-            <View style={styles.descriptionContainer}>
-              <Text style={styles.descriptionText}>
-                {currentDescription.text}
-              </Text>
-            </View>
-          )}
-        </View>
-
-        {/* Bottom Navigation */}
-        <View style={styles.bottomNav}>
-          {battleDetails.description.map((_, index) => (
-            <View
-              key={index}
-              style={[
-                styles.navDot,
-                currentIndex === index && styles.navDotActive,
-              ]}
-            />
-          ))}
-        </View>
-      </SafeAreaView>
+          {/* Bottom Navigation */}
+          <View style={styles.bottomNav}>
+            {battleDetails.description.map((_, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.navDot,
+                  currentIndex === index && styles.navDotActive,
+                ]}
+              />
+            ))}
+          </View>
+        </SafeAreaView>
+        <Back />
+        <View style={{height: 60}} />
+      </ScrollView>
     </MainLayout>
   );
 };
