@@ -41,7 +41,7 @@ const PlayGame = () => {
   const [power, setPower] = useState(MAX_POWER);
   const [arrowPath, setArrowPath] = useState([]); // Track arrow path
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  console.log('gameScores', gameScores);
+  // console.log('gameScores', gameScores);
   const arrowAnimation = useRef(new Animated.ValueXY()).current;
 
   useEffect(() => {
