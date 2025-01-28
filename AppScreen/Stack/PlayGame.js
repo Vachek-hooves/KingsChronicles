@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   StyleSheet,
   View,
@@ -38,7 +38,7 @@ const PlayGame = () => {
   useEffect(() => {
     generateTargets();
     const timer = setInterval(() => {
-      setTimeLeft(prev => prev > 0 ? prev - 1 : 0);
+      setTimeLeft(prev => (prev > 0 ? prev - 1 : 0));
     }, 1000);
     return () => clearInterval(timer);
   }, []);
@@ -56,32 +56,33 @@ const PlayGame = () => {
     setTargets(newTargets);
   };
 
-  const updatePower = (gesture) => {
+  const updatePower = gesture => {
     // Convert vertical drag to power
-    const newPower = MAX_POWER - Math.max(0, Math.min(gesture.dy, MAX_POWER - MIN_POWER));
+    const newPower =
+      MAX_POWER - Math.max(0, Math.min(gesture.dy, MAX_POWER - MIN_POWER));
     setPower(newPower);
   };
 
   const checkHits = (arrowX, arrowY) => {
-    setDebugPoint({ x: arrowX, y: arrowY });
-    
+    setDebugPoint({x: arrowX, y: arrowY});
+
     let hitSomething = false;
-    
+
     setTargets(currentTargets => {
       const newTargets = currentTargets.map(target => {
         // Check if arrow passes through target
         const targetCenterX = target.x + TARGET_SIZE / 2;
         const targetCenterY = target.y + TARGET_SIZE / 2;
-        
+
         // Calculate distance from arrow to target center
         const distance = Math.sqrt(
           Math.pow(arrowX - targetCenterX, 2) +
-          Math.pow(arrowY - targetCenterY, 2)
+            Math.pow(arrowY - targetCenterY, 2),
         );
 
         if (distance < HIT_THRESHOLD && !target.isHit) {
           hitSomething = true;
-          return { ...target, isHit: true };
+          return {...target, isHit: true};
         }
         return target;
       });
@@ -98,7 +99,7 @@ const PlayGame = () => {
       setTimeout(() => {
         setTargets(currentTargets => {
           if (currentTargets.every(t => t.isHit)) {
-            return Array.from({ length: 3 }, (_, i) => ({
+            return Array.from({length: 3}, (_, i) => ({
               id: i,
               x: 50 + Math.random() * (SCREEN_WIDTH - TARGET_SIZE - 100),
               y: 100 + Math.random() * (SCREEN_HEIGHT / 2.5),
@@ -116,7 +117,7 @@ const PlayGame = () => {
 
     setIsArrowFlying(true);
     setDebugPoint(null);
-    
+
     const targetX = Math.cos(aimAngle) * power;
     const targetY = Math.sin(aimAngle) * power;
 
@@ -124,18 +125,18 @@ const PlayGame = () => {
     const startY = SCREEN_HEIGHT - 150;
 
     Animated.timing(arrowAnimation, {
-      toValue: { x: targetX, y: targetY },
+      toValue: {x: targetX, y: targetY},
       duration: 1000,
       useNativeDriver: true,
     }).start(() => {
       const finalX = startX + targetX;
       const finalY = startY + targetY;
-      
+
       checkHits(finalX, finalY);
-      
+
       setTimeout(() => {
         setIsArrowFlying(false);
-        arrowAnimation.setValue({ x: 0, y: 0 });
+        arrowAnimation.setValue({x: 0, y: 0});
       }, 100);
     });
   };
@@ -155,14 +156,14 @@ const PlayGame = () => {
         const dy = gesture.dy;
         const angle = Math.atan2(-dy, -dx);
         setAimAngle(angle);
-        
+
         // Update power based on drag distance
         updatePower(gesture);
       },
       onPanResponderRelease: () => {
         setIsDragging(false);
       },
-    })
+    }),
   ).current;
 
   const renderAimLine = () => {
@@ -176,7 +177,7 @@ const PlayGame = () => {
             styles.aimLine,
             {
               width: 100,
-              transform: [{ rotate: `${aimAngle}rad` }],
+              transform: [{rotate: `${aimAngle}rad`}],
             },
           ]}
         />
@@ -186,9 +187,9 @@ const PlayGame = () => {
             styles.aimArrowIndicator,
             {
               transform: [
-                { translateX: Math.cos(aimAngle) * 100 },
-                { translateY: Math.sin(aimAngle) * 100 },
-                { rotate: `${aimAngle}rad` },
+                {translateX: Math.cos(aimAngle) * 100},
+                {translateY: Math.sin(aimAngle) * 100},
+                {rotate: `${aimAngle}rad`},
               ],
             },
           ]}>
@@ -214,24 +215,28 @@ const PlayGame = () => {
         <View style={styles.powerMeterContainer}>
           <Text style={styles.powerLabel}>POWER</Text>
           <View style={styles.powerMeter}>
-            <View 
+            <View
               style={[
-                styles.powerLevel, 
-                { 
+                styles.powerLevel,
+                {
                   height: `${(power / MAX_POWER) * 100}%`,
-                  backgroundColor: power > MAX_POWER * 0.7 ? '#FF4444' : 
-                                 power > MAX_POWER * 0.4 ? '#FFB344' : '#44FF44'
-                }
-              ]} 
+                  backgroundColor:
+                    power > MAX_POWER * 0.7
+                      ? '#FF4444'
+                      : power > MAX_POWER * 0.4
+                      ? '#FFB344'
+                      : '#44FF44',
+                },
+              ]}
             />
             {/* Power level markers with percentages */}
-            <View style={[styles.powerMarker, { bottom: '75%' }]}>
+            <View style={[styles.powerMarker, {bottom: '75%'}]}>
               <Text style={styles.markerText}>75%</Text>
             </View>
-            <View style={[styles.powerMarker, { bottom: '50%' }]}>
+            <View style={[styles.powerMarker, {bottom: '50%'}]}>
               <Text style={styles.markerText}>50%</Text>
             </View>
-            <View style={[styles.powerMarker, { bottom: '25%' }]}>
+            <View style={[styles.powerMarker, {bottom: '25%'}]}>
               <Text style={styles.markerText}>25%</Text>
             </View>
           </View>
@@ -242,19 +247,22 @@ const PlayGame = () => {
           </View>
         </View>
 
-        {targets.map((target) => (
+        {targets.map(target => (
           <View key={target.id}>
             <View
               style={[
                 styles.target,
-                { left: target.x, top: target.y },
+                {left: target.x, top: target.y},
                 target.isHit && styles.targetHit,
               ]}
             />
             <View
               style={[
                 styles.targetCenter,
-                { left: target.x + TARGET_SIZE / 2, top: target.y + TARGET_SIZE / 2 },
+                {
+                  left: target.x + TARGET_SIZE / 2,
+                  top: target.y + TARGET_SIZE / 2,
+                },
                 target.isHit && styles.targetCenterHit,
               ]}
             />
@@ -274,22 +282,57 @@ const PlayGame = () => {
           />
         )}
 
-        <View style={[styles.archer, { left: SCREEN_WIDTH / 2 - ARCHER_SIZE / 2 }]}>
+        {/* Direction control moved to right */}
+        <View style={styles.directionControl}>
+          {/* <View style={styles.directionBase} /> */}
+          {/* <View
+            style={[
+              styles.aimLine,
+              {
+                width: 80,
+                transform: [{rotate: `${aimAngle}rad`}],
+              },
+            ]}
+          /> */}
+          <View
+            style={[
+              styles.aimArrowIndicator,
+              {
+                transform: [
+                  {translateX: Math.cos(aimAngle) * 80},
+                  {translateY: Math.sin(aimAngle) * 80},
+                  {rotate: `${aimAngle}rad`},
+                ],
+              },
+            ]}>
+            <View style={styles.aimArrowHead} />
+          </View>
+        </View>
+
+        {/* Archer position */}
+        <View
+          style={[
+            styles.archer,
+            {
+              left: SCREEN_WIDTH / 2 - ARCHER_SIZE / 2,
+              // bottom: 50,
+            },
+          ]}>
           <Animated.Image
             source={require('../../assets/image/arrowgame/arrow.png')}
             style={[
               styles.arrow,
               {
                 transform: [
-                  { translateX: arrowAnimation.x },
-                  { translateY: arrowAnimation.y },
-                  { rotate: `${aimAngle}rad` },
+                  {translateX: arrowAnimation.x},
+                  {translateY: arrowAnimation.y},
+                  {rotate: `${aimAngle}rad`},
                 ],
               },
             ]}
             resizeMode="contain"
           />
-          {renderAimLine()}
+          {/* {renderAimLine()} */}
         </View>
 
         <TouchableOpacity
@@ -305,7 +348,7 @@ const PlayGame = () => {
         </TouchableOpacity>
 
         <View style={styles.debugInfo}>
-          <Text>Angle: {Math.round(aimAngle * 180 / Math.PI)}°</Text>
+          <Text>Angle: {Math.round((aimAngle * 180) / Math.PI)}°</Text>
           <Text>Flying: {isArrowFlying ? 'Yes' : 'No'}</Text>
           <Text>Score: {score}</Text>
         </View>
@@ -349,10 +392,27 @@ const styles = StyleSheet.create({
   },
   archer: {
     position: 'absolute',
-    bottom: 50,
+    bottom: 120,
     width: ARCHER_SIZE,
     height: ARCHER_SIZE,
     backgroundColor: '#171717',
+  },
+  directionControl: {
+    position: 'absolute',
+    right: 20,
+    bottom: 100, // Aligned with shoot button
+    width: 120,
+    height: 120,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  directionBase: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#C6A44E',
+    borderWidth: 2,
+    borderColor: '#171717',
   },
   arrow: {
     position: 'absolute',
@@ -361,6 +421,7 @@ const styles = StyleSheet.create({
     // top: ARCHER_SIZE / 2 - ARROW_SIZE / 2,
     // left: ARCHER_SIZE / 2,
     height: 100,
+    top: 80,
   },
   aimLine: {
     position: 'absolute',
@@ -379,28 +440,30 @@ const styles = StyleSheet.create({
     height: 0,
     backgroundColor: 'transparent',
     borderStyle: 'solid',
-    borderLeftWidth: 5,
-    borderRightWidth: 5,
-    borderBottomWidth: 10,
+    borderLeftWidth: 20,
+    borderRightWidth: 20,
+    borderBottomWidth: 35,
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
     borderBottomColor: '#C6A44E',
-    transform: [{ rotate: '90deg' }],
+    transform: [{rotate: '90deg'}],
   },
   shootButton: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 30,
     alignSelf: 'center',
     backgroundColor: '#C6A44E',
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 10,
     zIndex: 999,
+    
   },
   shootButtonText: {
     color: '#FFF',
     fontSize: 18,
     fontWeight: 'bold',
+    padding: 10,
   },
   debugInfo: {
     position: 'absolute',
@@ -412,7 +475,7 @@ const styles = StyleSheet.create({
   targetHit: {
     backgroundColor: '#171717',
     borderColor: '#C6A44E',
-    transform: [{ scale: 0.9 }],
+    transform: [{scale: 0.9}],
   },
   targetCenter: {
     width: 4,
@@ -430,7 +493,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 10,
     height: 10,
-    backgroundColor:  '#FF0000',
+    backgroundColor: '#FF0000',
     borderRadius: 5,
     zIndex: 999,
   },
