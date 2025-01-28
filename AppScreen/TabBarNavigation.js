@@ -23,18 +23,6 @@ const TabBarNavigation = () => {
         },
       }}>
       <Tab.Screen
-        name="Game"
-        component={Game}
-        options={{
-          tabBarIcon: ({color, focused}) => (
-            <Image
-              source={require('../assets/image/tabbar/games.png')}
-              style={[styles.tabIcon, {tintColor: color}]}
-            />
-          ),
-        }}
-      />
-      <Tab.Screen
         name="BattleList"
         component={BattleList}
         options={{
@@ -58,7 +46,7 @@ const TabBarNavigation = () => {
           ),
         }}
       />
-      
+
       <Tab.Screen
         name="Palace"
         component={Palace}
@@ -66,6 +54,18 @@ const TabBarNavigation = () => {
           tabBarIcon: ({color, focused}) => (
             <Image
               source={require('../assets/image/tabbar/palace.png')}
+              style={[styles.tabIcon, {tintColor: color}]}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Game"
+        component={Game}
+        options={{
+          tabBarIcon: ({color, focused}) => (
+            <Image
+              source={require('../assets/image/tabbar/games.png')}
               style={[styles.tabIcon, {tintColor: color}]}
             />
           ),
