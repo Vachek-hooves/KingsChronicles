@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
   },
   kingsBattleButton: {
     position: 'absolute',
-    bottom: 100,
+    bottom: 50,
     left: 20,
     right: 20,
     backgroundColor: '#C6A44E',
