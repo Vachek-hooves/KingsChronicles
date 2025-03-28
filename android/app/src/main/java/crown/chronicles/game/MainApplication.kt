@@ -1,4 +1,4 @@
-package com.kingschronicles
+package crown.chronicles.game
 
 import android.app.Application
 import com.facebook.react.PackageList
