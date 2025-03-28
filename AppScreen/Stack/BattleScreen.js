@@ -151,7 +151,7 @@ const BattleScreen = ({route}) => {
             ))}
           </View>
         </SafeAreaView>
-        <Back />
+        {/* <Back /> */}
         <View style={{height: 60}} />
       </ScrollView>
     </MainLayout>
