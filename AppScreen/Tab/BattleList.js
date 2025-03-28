@@ -73,7 +73,7 @@ const BattleList = ({navigation}) => {
           ]}
           onPress={handleKingsBattle}
           disabled={!selectedBattle}>
-          <Text style={styles.kingsBattleText}>King's Battle</Text>
+          <Text style={styles.kingsBattleText}>King's Battle  for Crown</Text>
         </Pressable>
       </SafeAreaView>
     </MainLayout>
