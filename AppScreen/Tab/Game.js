@@ -39,17 +39,17 @@ const Game = ({navigation}) => {
           {/* Header Icons */}
           <View style={styles.header}>
             <View style={styles.soundControl}>
-              <Image
+              {/* <Image
                 source={require('../../assets/image/game/sound.png')}
                 style={styles.icon}
-              />
-              <Switch
+              /> */}
+              {/* <Switch
                 value={isMusicEnable}
                 onValueChange={handleSoundToggle}
                 trackColor={{false: '#FFFFFF', true: '#C6A44E'}}
                 thumbColor={'#171717'}
                 style={styles.switch}
-              />
+              /> */}
             </View>
             {/* <TouchableOpacity style={styles.iconButton}>
               <Image 
@@ -69,7 +69,7 @@ const Game = ({navigation}) => {
           {/* Game Description */}
           <View style={styles.descriptionContainer}>
             <Text style={styles.descriptionText}>
-              Take part in the legendary King's Tournament, where precision and
+              Take part in the legendary Crown Tournament, where precision and
               strategy reign supreme. Step into the boots of a fearless knight
               and test your skills by hurling spears at challenging targets.
               From steady aims at static goals to quick thinking for moving

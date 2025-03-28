@@ -14,12 +14,12 @@ const IntroductionScreen = () => {
           style={styles.kingImage}
           resizeMode="contain"
         />
-        <Text style={styles.titleKing}>King's</Text>
+        <Text style={styles.titleKing}>Crown</Text>
         <Text style={styles.titleChronicles}>Chronicles</Text>
 
         <ScrollView>
           <Text style={styles.description}>
-            King's Chronicles 📜👑 is an app that invites users on an exciting
+            Crown Chronicles 📜👑 is an app that invites users on an exciting
             journey through the ages. 🌍✨ It combines historical facts,
             intriguing stories, and chronicles about rulers from various eras,
             highlighting their achievements, great victories, and mistakes that
